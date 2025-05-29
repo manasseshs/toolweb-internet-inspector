@@ -71,16 +71,16 @@ const CaptchaComponent: React.FC<CaptchaComponentProps> = ({ onVerify, isRequire
   }
 
   return (
-    <Card className="border-orange-200 bg-orange-50">
+    <Card className="border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 shadow-lg">
       <CardHeader className="pb-3">
-        <CardTitle className="text-sm font-medium text-orange-800 flex items-center gap-2">
+        <CardTitle className="text-sm font-medium text-amber-800 flex items-center gap-2">
           🔒 Security Verification Required
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-            <span className="text-lg font-mono bg-white px-3 py-2 rounded border">
+            <span className="text-lg font-mono bg-white px-4 py-3 rounded-lg border border-amber-200 shadow-sm">
               {captchaQuestion.question}
             </span>
             <Button
@@ -88,7 +88,7 @@ const CaptchaComponent: React.FC<CaptchaComponentProps> = ({ onVerify, isRequire
               variant="outline"
               size="sm"
               onClick={generateCaptcha}
-              className="px-2"
+              className="px-3 border-amber-300 hover:bg-amber-50"
             >
               <RefreshCw className="w-4 h-4" />
             </Button>
@@ -100,20 +100,20 @@ const CaptchaComponent: React.FC<CaptchaComponentProps> = ({ onVerify, isRequire
               placeholder="Your answer"
               value={userAnswer}
               onChange={(e) => setUserAnswer(e.target.value)}
-              className="w-32"
+              className="w-32 border-amber-200 focus:border-amber-400"
               onKeyPress={(e) => e.key === 'Enter' && handleVerify()}
             />
             <Button 
               onClick={handleVerify}
               disabled={!userAnswer}
-              className="bg-orange-500 hover:bg-orange-600"
+              className="bg-amber-500 hover:bg-amber-600 text-white shadow-md"
             >
               Verify
             </Button>
           </div>
           
           {isVerified && (
-            <div className="text-green-600 text-sm font-medium">
+            <div className="text-green-600 text-sm font-medium flex items-center gap-2">
               ✅ Verified! You can now proceed.
             </div>
           )}

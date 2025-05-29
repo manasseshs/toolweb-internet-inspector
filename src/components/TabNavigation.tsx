@@ -33,7 +33,7 @@ const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, onTabChange })
   ];
 
   return (
-    <div className="grid md:grid-cols-3 gap-4 mb-8">
+    <div className="grid md:grid-cols-3 gap-6">
       {tabs.map((tab) => {
         const TabIcon = tab.icon;
         const isActive = activeTab === tab.id;
@@ -41,23 +41,27 @@ const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, onTabChange })
         return (
           <Card 
             key={tab.id}
-            className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
+            className={`cursor-pointer transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1 bg-white/60 backdrop-blur-sm ${
               isActive 
-                ? 'border-blue-500 bg-blue-50 shadow-md' 
-                : 'border-gray-200 hover:border-gray-300'
+                ? 'border-indigo-400 bg-gradient-to-br from-indigo-50 to-purple-50 shadow-xl ring-2 ring-indigo-200' 
+                : 'border-slate-200 hover:border-slate-300'
             }`}
             onClick={() => onTabChange(tab.id)}
           >
             <div className="p-6 text-center">
-              <div className={`w-12 h-12 mx-auto mb-4 rounded-lg flex items-center justify-center ${
-                isActive ? 'bg-blue-500' : 'bg-gray-100'
+              <div className={`w-14 h-14 mx-auto mb-4 rounded-2xl flex items-center justify-center transition-all duration-300 ${
+                isActive 
+                  ? 'bg-gradient-to-r from-indigo-500 to-purple-600 shadow-lg' 
+                  : 'bg-slate-100 hover:bg-slate-200'
               }`}>
-                <TabIcon className={`w-6 h-6 ${isActive ? 'text-white' : 'text-gray-600'}`} />
+                <TabIcon className={`w-7 h-7 ${isActive ? 'text-white' : 'text-slate-600'}`} />
               </div>
-              <h3 className={`font-semibold mb-2 ${isActive ? 'text-blue-700' : 'text-gray-900'}`}>
+              <h3 className={`font-semibold mb-2 text-lg ${
+                isActive ? 'text-indigo-700' : 'text-slate-800'
+              }`}>
                 {tab.name}
               </h3>
-              <p className="text-sm text-gray-600">{tab.description}</p>
+              <p className="text-sm text-slate-600 leading-relaxed">{tab.description}</p>
             </div>
           </Card>
         );

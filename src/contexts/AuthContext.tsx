@@ -38,13 +38,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Set up auth state listener
+    // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state changed:', event, session);
         setSession(session);
         if (session?.user) {
-          // Add default plan for authenticated users
           const authUser = {
             ...session.user,
             plan: 'free' as const
@@ -57,7 +56,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     );
 
-    // Check for existing session
+    // Then check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session?.user) {
@@ -82,13 +81,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (error) {
         console.error('Login error:', error.message);
-        return false;
+        throw error;
       }
 
       return true;
     } catch (error) {
       console.error('Login error:', error);
-      return false;
+      throw error;
     }
   };
 
@@ -101,13 +100,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (error) {
         console.error('Registration error:', error.message);
-        return false;
+        throw error;
       }
 
       return true;
     } catch (error) {
       console.error('Registration error:', error);
-      return false;
+      throw error;
     }
   };
 
@@ -126,7 +125,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (user) {
       const updatedUser = { ...user, plan, planExpiry: expiry };
       setUser(updatedUser);
-      // In a real app, you would also update this in the database
     }
   };
 
