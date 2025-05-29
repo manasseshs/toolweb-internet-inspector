@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 
 const Dashboard = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, loading } = useAuth();
   const navigate = useNavigate();
   const [recentActivity, setRecentActivity] = useState([
     { id: 1, tool: 'Blacklist Check', target: '192.168.1.1', result: 'Clean', time: '2 minutes ago' },
@@ -18,17 +18,25 @@ const Dashboard = () => {
   ]);
 
   useEffect(() => {
-    if (!user) {
+    if (!loading && !user) {
       navigate('/login');
     }
-  }, [user, navigate]);
+  }, [user, loading, navigate]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center">
+        <div className="text-white">Loading...</div>
+      </div>
+    );
+  }
 
   if (!user) {
     return null;
   }
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate('/');
   };
 
@@ -50,6 +58,8 @@ const Dashboard = () => {
         return ['50 queries/month', 'Basic tools only', 'Community support'];
     }
   };
+
+  const userPlan = user.plan || 'free';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
@@ -170,12 +180,12 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-center mb-4">
-                  <div className={`inline-flex items-center px-3 py-1 rounded-full text-white text-sm font-medium ${getPlanColor(user.plan)}`}>
-                    {user.plan === 'free' && 'Free'}
-                    {user.plan === 'pro' && 'Pro'}
-                    {user.plan === 'enterprise' && 'Enterprise'}
+                  <div className={`inline-flex items-center px-3 py-1 rounded-full text-white text-sm font-medium ${getPlanColor(userPlan)}`}>
+                    {userPlan === 'free' && 'Free'}
+                    {userPlan === 'pro' && 'Pro'}
+                    {userPlan === 'enterprise' && 'Enterprise'}
                   </div>
-                  {user.plan === 'free' && (
+                  {userPlan === 'free' && (
                     <p className="text-gray-400 text-sm mt-2">Upgrade for more features</p>
                   )}
                   {user.planExpiry && (
@@ -186,7 +196,7 @@ const Dashboard = () => {
                 </div>
                 
                 <div className="space-y-2 mb-4">
-                  {getPlanFeatures(user.plan).map((feature, index) => (
+                  {getPlanFeatures(userPlan).map((feature, index) => (
                     <div key={index} className="flex items-center space-x-2">
                       <div className="w-1 h-1 bg-blue-400 rounded-full"></div>
                       <span className="text-gray-300 text-sm">{feature}</span>
@@ -195,7 +205,7 @@ const Dashboard = () => {
                 </div>
 
                 <div className="space-y-2">
-                  {user.plan === 'free' ? (
+                  {userPlan === 'free' ? (
                     <Button 
                       onClick={() => navigate('/pricing')} 
                       className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
