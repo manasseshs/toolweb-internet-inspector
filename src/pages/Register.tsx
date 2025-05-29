@@ -78,40 +78,40 @@ const Register = () => {
   // Show loading state while checking auth
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center">
-        <div className="text-white">Loading...</div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-gray-600">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <Link to="/" className="inline-flex items-center text-gray-400 hover:text-white mb-6">
+          <Link to="/" className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to home
           </Link>
           <div className="flex items-center justify-center space-x-3 mb-4">
-            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
               <Network className="w-7 h-7 text-white" />
             </div>
-            <h1 className="text-3xl font-bold text-white">ToolWeb.io</h1>
+            <h1 className="text-3xl font-bold text-gray-900">ToolWeb.io</h1>
           </div>
-          <p className="text-gray-400">Create your network tools account</p>
+          <p className="text-gray-600">Create your network tools account</p>
         </div>
 
-        <Card className="bg-gray-800/50 border-gray-700 backdrop-blur-sm">
+        <Card className="bg-white border-gray-200 shadow-sm">
           <CardHeader>
-            <CardTitle className="text-white text-2xl">Create Account</CardTitle>
-            <CardDescription className="text-gray-400">
+            <CardTitle className="text-gray-900 text-2xl">Create Account</CardTitle>
+            <CardDescription className="text-gray-600">
               Get started with your free account
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-white">Email</Label>
+                <Label htmlFor="email" className="text-gray-900">Email</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                   <Input
@@ -120,13 +120,13 @@ const Register = () => {
                     placeholder="Enter your email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="bg-gray-900 border-gray-600 text-white placeholder-gray-400 pl-10"
+                    className="bg-white border-gray-300 text-gray-900 placeholder-gray-500 pl-10"
                     required
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-white">Password</Label>
+                <Label htmlFor="password" className="text-gray-900">Password</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                   <Input
@@ -135,14 +135,14 @@ const Register = () => {
                     placeholder="Create a password (min. 6 characters)"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="bg-gray-900 border-gray-600 text-white placeholder-gray-400 pl-10"
+                    className="bg-white border-gray-300 text-gray-900 placeholder-gray-500 pl-10"
                     required
                     minLength={6}
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword" className="text-white">Confirm Password</Label>
+                <Label htmlFor="confirmPassword" className="text-gray-900">Confirm Password</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                   <Input
@@ -151,23 +151,23 @@ const Register = () => {
                     placeholder="Confirm your password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="bg-gray-900 border-gray-600 text-white placeholder-gray-400 pl-10"
+                    className="bg-white border-gray-300 text-gray-900 placeholder-gray-500 pl-10"
                     required
                   />
                 </div>
               </div>
               <Button 
                 type="submit" 
-                className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                className="w-full bg-blue-500 hover:bg-blue-600"
                 disabled={isLoading}
               >
                 {isLoading ? 'Creating account...' : 'Create Account'}
               </Button>
             </form>
             <div className="mt-6 text-center">
-              <p className="text-gray-400">
+              <p className="text-gray-600">
                 Already have an account?{' '}
-                <Link to="/login" className="text-blue-400 hover:text-blue-300">
+                <Link to="/login" className="text-blue-600 hover:text-blue-500">
                   Sign in
                 </Link>
               </p>

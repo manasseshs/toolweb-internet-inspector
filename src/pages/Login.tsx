@@ -58,40 +58,40 @@ const Login = () => {
   // Show loading state while checking auth
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center">
-        <div className="text-white">Loading...</div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-gray-600">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <Link to="/" className="inline-flex items-center text-gray-400 hover:text-white mb-6">
+          <Link to="/" className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to home
           </Link>
           <div className="flex items-center justify-center space-x-3 mb-4">
-            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
               <Network className="w-7 h-7 text-white" />
             </div>
-            <h1 className="text-3xl font-bold text-white">ToolWeb.io</h1>
+            <h1 className="text-3xl font-bold text-gray-900">ToolWeb.io</h1>
           </div>
-          <p className="text-gray-400">Access your network tools dashboard</p>
+          <p className="text-gray-600">Access your network tools dashboard</p>
         </div>
 
-        <Card className="bg-gray-800/50 border-gray-700 backdrop-blur-sm">
+        <Card className="bg-white border-gray-200 shadow-sm">
           <CardHeader>
-            <CardTitle className="text-white text-2xl">Sign In</CardTitle>
-            <CardDescription className="text-gray-400">
+            <CardTitle className="text-gray-900 text-2xl">Sign In</CardTitle>
+            <CardDescription className="text-gray-600">
               Enter your credentials to access your account
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-white">Email</Label>
+                <Label htmlFor="email" className="text-gray-900">Email</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                   <Input
@@ -100,13 +100,13 @@ const Login = () => {
                     placeholder="Enter your email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="bg-gray-900 border-gray-600 text-white placeholder-gray-400 pl-10"
+                    className="bg-white border-gray-300 text-gray-900 placeholder-gray-500 pl-10"
                     required
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-white">Password</Label>
+                <Label htmlFor="password" className="text-gray-900">Password</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                   <Input
@@ -115,23 +115,23 @@ const Login = () => {
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="bg-gray-900 border-gray-600 text-white placeholder-gray-400 pl-10"
+                    className="bg-white border-gray-300 text-gray-900 placeholder-gray-500 pl-10"
                     required
                   />
                 </div>
               </div>
               <Button 
                 type="submit" 
-                className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                className="w-full bg-blue-500 hover:bg-blue-600"
                 disabled={isLoading}
               >
                 {isLoading ? 'Signing in...' : 'Sign In'}
               </Button>
             </form>
             <div className="mt-6 text-center">
-              <p className="text-gray-400">
+              <p className="text-gray-600">
                 Don't have an account?{' '}
-                <Link to="/register" className="text-blue-400 hover:text-blue-300">
+                <Link to="/register" className="text-blue-600 hover:text-blue-500">
                   Create one
                 </Link>
               </p>

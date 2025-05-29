@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Network, Check, Star, Zap, Crown, ArrowLeft, CreditCard } from 'lucide-react';
+import { Network, Check, Star, Zap, Crown, ArrowLeft, CreditCard, Mail, Database, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -23,15 +23,16 @@ const Pricing = () => {
       price: { monthly: 0, annual: 0 },
       description: 'Perfect for getting started',
       features: [
-        '50 queries per month',
-        'Basic IP & DNS tools',
+        '10 emails verification per day',
+        'Basic IP & DNS tools (with CAPTCHA)',
+        '10 GB email migration per account',
         'Community support',
         'Rate limited access'
       ],
       limitations: [
-        'No email tools',
-        'No advanced features',
-        'No priority support'
+        'CAPTCHA required for all tools',
+        'No priority support',
+        'Limited daily usage'
       ]
     },
     {
@@ -42,8 +43,9 @@ const Pricing = () => {
       description: 'For professionals and teams',
       popular: true,
       features: [
-        '200 queries per month',
-        'All IP & DNS tools',
+        '100,000 email verifications per month',
+        '20 email migrations per day (any size)',
+        'All IP & DNS tools (no CAPTCHA)',
         'Email deliverability tests',
         'SPF/DKIM generators',
         'Priority support',
@@ -51,8 +53,8 @@ const Pricing = () => {
         'Export reports'
       ],
       limitations: [
-        'No email migration',
-        'Limited to 200 queries'
+        'Limited to Pro features',
+        'Email support only'
       ]
     },
     {
@@ -62,8 +64,9 @@ const Pricing = () => {
       price: { monthly: 19, annual: 190 },
       description: 'For large organizations',
       features: [
-        'Unlimited queries',
-        'All tools included',
+        '1,000,000 email verifications per month',
+        '100 email migrations per day (unlimited size)',
+        'All tools included (no limits)',
         'Email migration (IMAP)',
         '24/7 priority support',
         'Custom integrations',
@@ -117,17 +120,17 @@ const Pricing = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="border-b border-gray-800 bg-black/50 backdrop-blur-sm">
+      <header className="border-b border-gray-200 bg-white shadow-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
               <Network className="w-6 h-6 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-white">ToolWeb.io</h1>
+            <h1 className="text-2xl font-bold text-gray-900">ToolWeb.io</h1>
           </div>
-          <Link to="/" className="text-gray-400 hover:text-white">
+          <Link to="/" className="text-gray-600 hover:text-gray-900">
             <ArrowLeft className="w-5 h-5" />
           </Link>
         </div>
@@ -136,20 +139,65 @@ const Pricing = () => {
       <div className="container mx-auto px-4 py-12">
         {/* Hero Section */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             Choose Your Plan
           </h1>
-          <p className="text-xl text-gray-400 mb-8">
+          <p className="text-xl text-gray-600 mb-8">
             Unlock powerful network and email diagnostic tools
           </p>
           
           {/* Billing Toggle */}
           <div className="flex items-center justify-center space-x-4 mb-8">
-            <span className={`text-sm ${!isAnnual ? 'text-white' : 'text-gray-400'}`}>Monthly</span>
+            <span className={`text-sm ${!isAnnual ? 'text-gray-900' : 'text-gray-600'}`}>Monthly</span>
             <Switch checked={isAnnual} onCheckedChange={setIsAnnual} />
-            <span className={`text-sm ${isAnnual ? 'text-white' : 'text-gray-400'}`}>Annual</span>
-            <Badge variant="secondary" className="bg-green-600 text-white">Save 17%</Badge>
+            <span className={`text-sm ${isAnnual ? 'text-gray-900' : 'text-gray-600'}`}>Annual</span>
+            <Badge variant="secondary" className="bg-green-100 text-green-800">Save 17%</Badge>
           </div>
+        </div>
+
+        {/* Usage Limits Info */}
+        <div className="grid md:grid-cols-3 gap-6 mb-12">
+          <Card className="border-blue-200 bg-blue-50">
+            <CardHeader className="text-center">
+              <Mail className="w-8 h-8 text-blue-600 mx-auto mb-2" />
+              <CardTitle className="text-blue-800">Email Verification</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2 text-sm text-blue-700">
+                <div>Free: 10 emails/day</div>
+                <div>Pro: 100,000/month</div>
+                <div>Enterprise: 1M/month</div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="border-green-200 bg-green-50">
+            <CardHeader className="text-center">
+              <Database className="w-8 h-8 text-green-600 mx-auto mb-2" />
+              <CardTitle className="text-green-800">Email Migration</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2 text-sm text-green-700">
+                <div>Free: 10 GB/account</div>
+                <div>Pro: 20 migrations/day</div>
+                <div>Enterprise: 100/day</div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="border-purple-200 bg-purple-50">
+            <CardHeader className="text-center">
+              <Shield className="w-8 h-8 text-purple-600 mx-auto mb-2" />
+              <CardTitle className="text-purple-800">Tool Access</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2 text-sm text-purple-700">
+                <div>Free: CAPTCHA required</div>
+                <div>Pro: No CAPTCHA</div>
+                <div>Enterprise: Full access</div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Pricing Cards */}
@@ -163,7 +211,7 @@ const Pricing = () => {
             return (
               <Card 
                 key={plan.id} 
-                className={`relative bg-gray-800/50 border-gray-700 ${plan.popular ? 'ring-2 ring-blue-500' : ''}`}
+                className={`relative bg-white border-gray-200 ${plan.popular ? 'ring-2 ring-blue-500' : ''}`}
               >
                 {plan.popular && (
                   <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
@@ -174,26 +222,26 @@ const Pricing = () => {
                 <CardHeader className="text-center">
                   <div className="flex items-center justify-center mb-4">
                     <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
-                      plan.id === 'free' ? 'bg-gray-600' :
+                      plan.id === 'free' ? 'bg-gray-100' :
                       plan.id === 'pro' ? 'bg-blue-500' : 'bg-purple-500'
                     }`}>
-                      <PlanIcon className="w-6 h-6 text-white" />
+                      <PlanIcon className={`w-6 h-6 ${plan.id === 'free' ? 'text-gray-600' : 'text-white'}`} />
                     </div>
                   </div>
-                  <CardTitle className="text-white text-2xl">{plan.name}</CardTitle>
-                  <CardDescription className="text-gray-400">{plan.description}</CardDescription>
+                  <CardTitle className="text-gray-900 text-2xl">{plan.name}</CardTitle>
+                  <CardDescription className="text-gray-600">{plan.description}</CardDescription>
                   
                   <div className="py-4">
-                    <div className="text-4xl font-bold text-white">
+                    <div className="text-4xl font-bold text-gray-900">
                       ${price}
                       {plan.id !== 'free' && (
-                        <span className="text-lg text-gray-400">
+                        <span className="text-lg text-gray-600">
                           /{isAnnual ? 'year' : 'month'}
                         </span>
                       )}
                     </div>
                     {isAnnual && plan.id !== 'free' && (
-                      <p className="text-sm text-gray-400 mt-1">
+                      <p className="text-sm text-gray-500 mt-1">
                         ${plan.price.monthly}/month billed annually
                       </p>
                     )}
@@ -204,14 +252,14 @@ const Pricing = () => {
                   <div className="space-y-3 mb-6">
                     {plan.features.map((feature, index) => (
                       <div key={index} className="flex items-center space-x-3">
-                        <Check className="w-4 h-4 text-green-400 flex-shrink-0" />
-                        <span className="text-gray-300 text-sm">{feature}</span>
+                        <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
+                        <span className="text-gray-700 text-sm">{feature}</span>
                       </div>
                     ))}
                   </div>
 
                   {isCurrentPlan ? (
-                    <Button disabled className="w-full bg-gray-600 text-gray-400">
+                    <Button disabled className="w-full bg-gray-100 text-gray-500">
                       Current Plan
                     </Button>
                   ) : (
@@ -219,8 +267,8 @@ const Pricing = () => {
                       onClick={() => handleSubscribe(plan.id, price)}
                       className={`w-full ${
                         plan.id === 'free' 
-                          ? 'bg-gray-600 hover:bg-gray-700' 
-                          : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700'
+                          ? 'bg-gray-100 hover:bg-gray-200 text-gray-800' 
+                          : 'bg-blue-500 hover:bg-blue-600 text-white'
                       }`}
                     >
                       {plan.id === 'free' ? (
