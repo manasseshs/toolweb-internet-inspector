@@ -31,14 +31,14 @@ const CaptchaComponent: React.FC<CaptchaComponentProps> = ({ onVerify, isRequire
 
   return (
     <Card className="border-[#dee2e6] bg-white shadow-sm">
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium text-[#495057] flex items-center gap-2">
           🔒 Security Verification Required
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-3">
-          <div className="flex flex-col items-center gap-3">
+      <CardContent className="pt-0 pb-4">
+        <div className="space-y-2">
+          <div className="flex flex-col items-center gap-2">
             <ReCAPTCHA
               sitekey={RECAPTCHA_SITE_KEY}
               onChange={handleRecaptchaChange}
@@ -49,7 +49,7 @@ const CaptchaComponent: React.FC<CaptchaComponentProps> = ({ onVerify, isRequire
           </div>
           
           {isVerified && (
-            <div className="text-green-600 text-sm font-medium flex items-center gap-2 justify-center">
+            <div className="text-[#28a745] text-sm font-medium flex items-center gap-2 justify-center">
               ✅ Verified! You can now proceed.
             </div>
           )}

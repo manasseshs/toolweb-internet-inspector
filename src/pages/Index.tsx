@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Network, User, LogIn, Settings } from 'lucide-react';
@@ -51,6 +50,8 @@ const Index = () => {
   const getToolInfo = (toolId: string) => {
     return toolsInfo[toolId as keyof typeof toolsInfo] || { name: 'Unknown Tool', inputType: 'Input', free: true };
   };
+
+  const isDarkMode = activeTab === 'web';
 
   return (
     <div className="min-h-screen bg-[#f8f9fa]">
@@ -108,9 +109,9 @@ const Index = () => {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-6">
+      <main className="container mx-auto px-4 py-4">
         {/* Hero Section */}
-        <div className="text-center mb-6">
+        <div className="text-center mb-4">
           <div className="mb-4">
             {/* Robot Mascot */}
             <div className="w-16 h-16 bg-gradient-to-r from-[#0d6efd] to-[#6f42c1] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
@@ -145,14 +146,26 @@ const Index = () => {
         />
 
         {/* Tool Selection */}
-        <Card className="mt-6 mb-6 border-[#dee2e6] shadow-sm bg-white">
-          <CardHeader className="bg-[#f8f9fa] rounded-t-lg border-b border-[#dee2e6]">
-            <CardTitle className="text-[#212529] text-xl">Select Tool</CardTitle>
-            <CardDescription className="text-[#6c757d]">
+        <Card className={`mt-4 mb-4 shadow-sm transition-colors duration-200 ${
+          isDarkMode 
+            ? 'border-[#475569] bg-[#1e293b]' 
+            : 'border-[#dee2e6] bg-white'
+        }`}>
+          <CardHeader className={`rounded-t-lg border-b transition-colors duration-200 ${
+            isDarkMode 
+              ? 'bg-[#334155] border-[#475569]' 
+              : 'bg-[#f8f9fa] border-[#dee2e6]'
+          }`}>
+            <CardTitle className={`text-xl ${
+              isDarkMode ? 'text-[#f1f5f9]' : 'text-[#212529]'
+            }`}>
+              Select Tool
+            </CardTitle>
+            <CardDescription className={isDarkMode ? 'text-[#94a3b8]' : 'text-[#6c757d]'}>
               Choose from our comprehensive suite of network and email analysis tools
             </CardDescription>
           </CardHeader>
-          <CardContent className="p-6">
+          <CardContent className="p-4">
             <ToolSelector 
               activeCategory={activeTab}
               selectedTool={selectedTool}
@@ -162,7 +175,7 @@ const Index = () => {
         </Card>
 
         {/* Tool Executor */}
-        <div className="mb-6">
+        <div className="mb-4">
           <ToolExecutor 
             selectedTool={selectedTool}
             toolName={getToolInfo(selectedTool).name}
@@ -173,7 +186,7 @@ const Index = () => {
       </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-[#dee2e6] mt-12">
+      <footer className="bg-white border-t border-[#dee2e6] mt-8">
         <div className="container mx-auto px-4 py-8">
           <div className="grid md:grid-cols-4 gap-6">
             <div>

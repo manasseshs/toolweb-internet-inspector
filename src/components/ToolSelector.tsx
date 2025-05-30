@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Shield, Network, Globe, Mail, Server, Zap, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -55,9 +54,10 @@ const ToolSelector: React.FC<ToolSelectorProps> = ({ activeCategory, selectedToo
   ];
 
   const filteredTools = tools.filter(tool => tool.category === activeCategory);
+  const isDarkMode = activeCategory === 'web';
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+    <div className="flex flex-wrap gap-2 justify-start">
       {filteredTools.map((tool) => {
         const ToolIcon = tool.icon;
         const isSelected = selectedTool === tool.id;
@@ -66,30 +66,50 @@ const ToolSelector: React.FC<ToolSelectorProps> = ({ activeCategory, selectedToo
           <Button
             key={tool.id}
             variant="outline"
-            className={`h-20 p-3 justify-start text-left border transition-all duration-200 ${
-              isSelected 
-                ? 'bg-[#e9ecef] border-[#0d6efd] text-[#212529] shadow-sm' 
-                : 'bg-white border-[#dee2e6] text-[#212529] hover:bg-[#f8f9fa] hover:border-[#0d6efd]'
-            }`}
+            className={`
+              min-w-[150px] max-w-[220px] h-[80px] p-3 
+              flex flex-col items-start justify-center text-left
+              transition-all duration-200 cursor-pointer
+              ${isDarkMode 
+                ? isSelected
+                  ? 'bg-[#334155] border-[#cbd5e1] text-[#f1f5f9] shadow-sm'
+                  : 'bg-[#1e293b] border-[#475569] text-[#e5e7eb] hover:bg-[#334155] hover:border-[#cbd5e1]'
+                : isSelected 
+                  ? 'bg-[#e9ecef] border-[#0d6efd] text-[#212529] shadow-sm' 
+                  : 'bg-white border-[#dee2e6] text-[#212529] hover:bg-[#f8f9fa] hover:border-[#0d6efd]'
+              }
+            `}
             onClick={() => onToolSelect(tool.id)}
           >
-            <div className="flex items-center space-x-2 w-full">
-              <ToolIcon className={`w-4 h-4 flex-shrink-0 ${isSelected ? 'text-[#0d6efd]' : 'text-[#6c757d]'}`} />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between mb-1">
-                  <h4 className={`font-medium text-sm truncate ${isSelected ? 'text-[#212529]' : 'text-[#212529]'}`}>
+            <div className="w-full">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center space-x-2">
+                  <ToolIcon className={`w-4 h-4 flex-shrink-0 ${
+                    isDarkMode 
+                      ? isSelected ? 'text-[#cbd5e1]' : 'text-[#94a3b8]'
+                      : isSelected ? 'text-[#0d6efd]' : 'text-[#6c757d]'
+                  }`} />
+                  <h4 className={`font-medium text-sm truncate ${
+                    isDarkMode ? 'text-[#f1f5f9]' : 'text-[#212529]'
+                  }`}>
                     {tool.name}
                   </h4>
-                  {!tool.free && (
-                    <Badge variant="outline" className="text-xs ml-1 border-[#dee2e6] text-[#6c757d]">
-                      Pro
-                    </Badge>
-                  )}
                 </div>
-                <p className="text-xs text-[#6c757d] truncate">
-                  {tool.inputType}
-                </p>
+                {!tool.free && (
+                  <Badge variant="outline" className={`text-xs ml-1 ${
+                    isDarkMode 
+                      ? 'border-[#475569] text-[#94a3b8]'
+                      : 'border-[#dee2e6] text-[#6c757d]'
+                  }`}>
+                    Pro
+                  </Badge>
+                )}
               </div>
+              <p className={`text-xs truncate ${
+                isDarkMode ? 'text-[#94a3b8]' : 'text-[#6c757d]'
+              }`}>
+                {tool.inputType}
+              </p>
             </div>
           </Button>
         );
