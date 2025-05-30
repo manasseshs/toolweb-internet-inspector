@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Network, User, LogIn, Settings } from 'lucide-react';
@@ -52,38 +53,52 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="min-h-screen bg-[#f8f9fa]">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-slate-200 shadow-sm sticky top-0 z-50">
+      <header className="bg-white border-b border-[#dee2e6] shadow-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+            <div className="w-10 h-10 bg-gradient-to-r from-[#0d6efd] to-[#6f42c1] rounded-xl flex items-center justify-center shadow-sm">
               <Network className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-slate-800">ToolWeb.io</h1>
-              <p className="text-sm text-slate-600">Network & Email Diagnostic Tools</p>
+              <h1 className="text-2xl font-bold text-[#212529]">ToolWeb.io</h1>
+              <p className="text-sm text-[#6c757d]">Network & Email Diagnostic Tools</p>
             </div>
           </div>
           <div className="flex items-center space-x-3">
             {user ? (
               <>
-                <Button variant="outline" onClick={() => navigate('/dashboard')} className="border-slate-300 text-slate-700 hover:bg-slate-50">
+                <Button 
+                  variant="outline" 
+                  onClick={() => navigate('/dashboard')} 
+                  className="border-[#0d6efd] text-[#212529] hover:bg-[#0d6efd] hover:text-white transition-colors duration-200"
+                >
                   <User className="w-4 h-4 mr-2" />
                   Dashboard
                 </Button>
-                <Button onClick={() => navigate('/pricing')} className="bg-indigo-500 hover:bg-indigo-600 text-white shadow-md">
+                <Button 
+                  onClick={() => navigate('/pricing')} 
+                  className="bg-[#0d6efd] hover:bg-[#0b5ed7] text-white shadow-sm"
+                >
                   <Settings className="w-4 h-4 mr-2" />
                   Upgrade
                 </Button>
               </>
             ) : (
               <>
-                <Button variant="outline" onClick={() => navigate('/login')} className="border-slate-300 text-slate-700 hover:bg-slate-50">
+                <Button 
+                  variant="outline" 
+                  onClick={() => navigate('/login')} 
+                  className="border-[#0d6efd] text-[#212529] hover:bg-[#0d6efd] hover:text-white transition-colors duration-200"
+                >
                   <LogIn className="w-4 h-4 mr-2" />
                   Login
                 </Button>
-                <Button onClick={() => navigate('/pricing')} className="bg-indigo-500 hover:bg-indigo-600 text-white shadow-md">
+                <Button 
+                  onClick={() => navigate('/pricing')} 
+                  className="bg-[#0d6efd] hover:bg-[#0b5ed7] text-white shadow-sm"
+                >
                   Upgrade
                 </Button>
               </>
@@ -93,32 +108,32 @@ const Index = () => {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-6">
         {/* Hero Section */}
-        <div className="text-center mb-8">
-          <div className="mb-6">
+        <div className="text-center mb-6">
+          <div className="mb-4">
             {/* Robot Mascot */}
-            <div className="w-20 h-20 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl">
-              <Network className="w-10 h-10 text-white" />
+            <div className="w-16 h-16 bg-gradient-to-r from-[#0d6efd] to-[#6f42c1] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <Network className="w-8 h-8 text-white" />
             </div>
             
-            <h2 className="text-5xl md:text-6xl font-bold text-slate-800 mb-4 leading-tight">
+            <h2 className="text-4xl md:text-5xl font-bold text-[#212529] mb-3 leading-tight">
               Professional Network
-              <span className="block bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              <span className="block bg-gradient-to-r from-[#0d6efd] to-[#6f42c1] bg-clip-text text-transparent">
                 Diagnostic Tools
               </span>
             </h2>
             
-            <p className="text-xl text-slate-600 mb-4 max-w-2xl mx-auto">
+            <p className="text-lg text-[#6c757d] mb-4 max-w-2xl mx-auto">
               Analyze IP addresses, domains, and email systems with precision and ease
             </p>
             
-            <div className="inline-flex items-center bg-white/60 backdrop-blur-sm rounded-full px-6 py-3 border border-slate-200 shadow-sm">
-              <span className="text-slate-600 mr-2">Hello</span>
-              <span className="text-indigo-600 font-mono font-semibold bg-indigo-50 px-3 py-1 rounded-full text-sm">
+            <div className="inline-flex items-center bg-white rounded-full px-5 py-2 border border-[#dee2e6] shadow-sm">
+              <span className="text-[#6c757d] mr-2">Hello</span>
+              <span className="text-[#0d6efd] font-mono font-semibold bg-[#f8f9fa] px-3 py-1 rounded-full text-sm border border-[#dee2e6]">
                 {userIP}
               </span>
-              <span className="text-slate-600 ml-2">, what can I help you with today?</span>
+              <span className="text-[#6c757d] ml-2">, what can I help you with today?</span>
             </div>
           </div>
         </div>
@@ -130,10 +145,10 @@ const Index = () => {
         />
 
         {/* Tool Selection */}
-        <Card className="mt-8 mb-8 border-slate-200 shadow-lg bg-white/60 backdrop-blur-sm">
-          <CardHeader className="bg-gradient-to-r from-slate-50 to-blue-50 rounded-t-lg">
-            <CardTitle className="text-slate-800 text-xl">Select Tool</CardTitle>
-            <CardDescription className="text-slate-600">
+        <Card className="mt-6 mb-6 border-[#dee2e6] shadow-sm bg-white">
+          <CardHeader className="bg-[#f8f9fa] rounded-t-lg border-b border-[#dee2e6]">
+            <CardTitle className="text-[#212529] text-xl">Select Tool</CardTitle>
+            <CardDescription className="text-[#6c757d]">
               Choose from our comprehensive suite of network and email analysis tools
             </CardDescription>
           </CardHeader>
@@ -147,7 +162,7 @@ const Index = () => {
         </Card>
 
         {/* Tool Executor */}
-        <div className="mb-8">
+        <div className="mb-6">
           <ToolExecutor 
             selectedTool={selectedTool}
             toolName={getToolInfo(selectedTool).name}
@@ -158,47 +173,47 @@ const Index = () => {
       </main>
 
       {/* Footer */}
-      <footer className="bg-white/80 backdrop-blur-sm border-t border-slate-200 mt-16">
-        <div className="container mx-auto px-4 py-12">
-          <div className="grid md:grid-cols-4 gap-8">
+      <footer className="bg-white border-t border-[#dee2e6] mt-12">
+        <div className="container mx-auto px-4 py-8">
+          <div className="grid md:grid-cols-4 gap-6">
             <div>
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
+              <div className="flex items-center space-x-3 mb-3">
+                <div className="w-8 h-8 bg-gradient-to-r from-[#0d6efd] to-[#6f42c1] rounded-lg flex items-center justify-center">
                   <Network className="w-5 h-5 text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-slate-800">ToolWeb.io</h3>
+                <h3 className="text-lg font-bold text-[#212529]">ToolWeb.io</h3>
               </div>
-              <p className="text-slate-600">Professional network and email diagnostic tools for IT professionals and businesses.</p>
+              <p className="text-[#6c757d] text-sm">Professional network and email diagnostic tools for IT professionals and businesses.</p>
             </div>
             <div>
-              <h4 className="text-slate-800 font-semibold mb-4">Popular Tools</h4>
-              <ul className="space-y-2 text-slate-600">
-                <li><button onClick={() => setSelectedTool('blacklist')} className="hover:text-indigo-600 transition-colors">Blacklist Check</button></li>
-                <li><button onClick={() => setSelectedTool('mx')} className="hover:text-indigo-600 transition-colors">MX Lookup</button></li>
-                <li><button onClick={() => setSelectedTool('ping')} className="hover:text-indigo-600 transition-colors">Ping Test</button></li>
-                <li><button onClick={() => setSelectedTool('whois')} className="hover:text-indigo-600 transition-colors">WHOIS</button></li>
+              <h4 className="text-[#212529] font-semibold mb-3 text-sm">Popular Tools</h4>
+              <ul className="space-y-2 text-sm text-[#6c757d]">
+                <li><button onClick={() => setSelectedTool('blacklist')} className="hover:text-[#0d6efd] transition-colors">Blacklist Check</button></li>
+                <li><button onClick={() => setSelectedTool('mx')} className="hover:text-[#0d6efd] transition-colors">MX Lookup</button></li>
+                <li><button onClick={() => setSelectedTool('ping')} className="hover:text-[#0d6efd] transition-colors">Ping Test</button></li>
+                <li><button onClick={() => setSelectedTool('whois')} className="hover:text-[#0d6efd] transition-colors">WHOIS</button></li>
               </ul>
             </div>
             <div>
-              <h4 className="text-slate-800 font-semibold mb-4">Account</h4>
-              <ul className="space-y-2 text-slate-600">
-                <li><a href="/login" className="hover:text-indigo-600 transition-colors">Login</a></li>
-                <li><a href="/register" className="hover:text-indigo-600 transition-colors">Register</a></li>
-                <li><a href="/pricing" className="hover:text-indigo-600 transition-colors">Pricing</a></li>
-                <li><a href="/dashboard" className="hover:text-indigo-600 transition-colors">Dashboard</a></li>
+              <h4 className="text-[#212529] font-semibold mb-3 text-sm">Account</h4>
+              <ul className="space-y-2 text-sm text-[#6c757d]">
+                <li><a href="/login" className="hover:text-[#0d6efd] transition-colors">Login</a></li>
+                <li><a href="/register" className="hover:text-[#0d6efd] transition-colors">Register</a></li>
+                <li><a href="/pricing" className="hover:text-[#0d6efd] transition-colors">Pricing</a></li>
+                <li><a href="/dashboard" className="hover:text-[#0d6efd] transition-colors">Dashboard</a></li>
               </ul>
             </div>
             <div>
-              <h4 className="text-slate-800 font-semibold mb-4">Support</h4>
-              <ul className="space-y-2 text-slate-600">
-                <li><a href="/contact" className="hover:text-indigo-600 transition-colors">Contact Us</a></li>
-                <li><a href="/help" className="hover:text-indigo-600 transition-colors">Help Center</a></li>
-                <li><a href="/privacy" className="hover:text-indigo-600 transition-colors">Privacy Policy</a></li>
-                <li><a href="/terms" className="hover:text-indigo-600 transition-colors">Terms of Use</a></li>
+              <h4 className="text-[#212529] font-semibold mb-3 text-sm">Support</h4>
+              <ul className="space-y-2 text-sm text-[#6c757d]">
+                <li><a href="/contact" className="hover:text-[#0d6efd] transition-colors">Contact Us</a></li>
+                <li><a href="/help" className="hover:text-[#0d6efd] transition-colors">Help Center</a></li>
+                <li><a href="/privacy" className="hover:text-[#0d6efd] transition-colors">Privacy Policy</a></li>
+                <li><a href="/terms" className="hover:text-[#0d6efd] transition-colors">Terms of Use</a></li>
               </ul>
             </div>
           </div>
-          <div className="border-t border-slate-200 mt-8 pt-8 text-center text-slate-500">
+          <div className="border-t border-[#dee2e6] mt-6 pt-6 text-center text-[#6c757d] text-sm">
             <p>&copy; 2024 ToolWeb.io. All rights reserved.</p>
           </div>
         </div>

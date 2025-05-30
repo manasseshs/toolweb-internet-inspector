@@ -34,9 +34,9 @@ const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, onTabChange })
   ];
 
   return (
-    <div className="w-full bg-white/60 backdrop-blur-sm border-b border-gray-200 shadow-sm">
+    <div className="w-full bg-white border-b border-[#dee2e6]">
       <div className="container mx-auto px-4">
-        <nav className="flex space-x-0 overflow-x-auto scrollbar-hide">
+        <nav className="flex space-x-1 overflow-x-auto">
           {tabs.map((tab) => {
             const TabIcon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -45,22 +45,22 @@ const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, onTabChange })
               <button
                 key={tab.id}
                 onClick={() => onTabChange(tab.id)}
-                disabled={tab.id === 'web'} // Desabilitar Web Tools (futuro)
+                disabled={tab.id === 'web'}
                 className={`
-                  flex items-center space-x-2 px-6 py-4 text-sm font-medium 
+                  flex items-center space-x-2 px-4 py-3 text-sm font-medium 
                   whitespace-nowrap border-b-2 transition-all duration-200
                   ${isActive 
-                    ? 'text-[#0d6efd] border-[#0d6efd] font-bold' 
+                    ? 'text-[#0d6efd] border-[#0d6efd] bg-white' 
                     : tab.id === 'web'
-                      ? 'text-gray-400 border-transparent cursor-not-allowed'
-                      : 'text-[#6c757d] border-transparent hover:text-[#66b0ff] hover:border-[#66b0ff]'
+                      ? 'text-[#6c757d] border-transparent cursor-not-allowed bg-white'
+                      : 'text-[#6c757d] border-transparent hover:text-[#0d6efd] hover:border-[#0d6efd] bg-white'
                   }
                 `}
               >
                 <TabIcon className="w-4 h-4" />
                 <span>{tab.name}</span>
                 {tab.id === 'web' && (
-                  <span className="text-xs bg-gray-200 text-gray-500 px-2 py-1 rounded-full">
+                  <span className="text-xs bg-[#f8f9fa] text-[#6c757d] px-2 py-1 rounded border border-[#dee2e6]">
                     Em breve
                   </span>
                 )}

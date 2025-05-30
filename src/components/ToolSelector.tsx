@@ -57,7 +57,7 @@ const ToolSelector: React.FC<ToolSelectorProps> = ({ activeCategory, selectedToo
   const filteredTools = tools.filter(tool => tool.category === activeCategory);
 
   return (
-    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
       {filteredTools.map((tool) => {
         const ToolIcon = tool.icon;
         const isSelected = selectedTool === tool.id;
@@ -65,32 +65,29 @@ const ToolSelector: React.FC<ToolSelectorProps> = ({ activeCategory, selectedToo
         return (
           <Button
             key={tool.id}
-            variant={isSelected ? "default" : "outline"}
-            className={`h-auto p-4 justify-start text-left ${
+            variant="outline"
+            className={`h-20 p-3 justify-start text-left border transition-all duration-200 ${
               isSelected 
-                ? 'bg-blue-500 hover:bg-blue-600 border-blue-500' 
-                : 'hover:border-blue-300 hover:bg-blue-50'
+                ? 'bg-[#e9ecef] border-[#0d6efd] text-[#212529] shadow-sm' 
+                : 'bg-white border-[#dee2e6] text-[#212529] hover:bg-[#f8f9fa] hover:border-[#0d6efd]'
             }`}
             onClick={() => onToolSelect(tool.id)}
           >
-            <div className="flex items-start space-x-3 w-full">
-              <ToolIcon className={`w-5 h-5 mt-0.5 ${isSelected ? 'text-white' : 'text-gray-600'}`} />
+            <div className="flex items-center space-x-2 w-full">
+              <ToolIcon className={`w-4 h-4 flex-shrink-0 ${isSelected ? 'text-[#0d6efd]' : 'text-[#6c757d]'}`} />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1">
-                  <h4 className={`font-medium ${isSelected ? 'text-white' : 'text-gray-900'}`}>
+                  <h4 className={`font-medium text-sm truncate ${isSelected ? 'text-[#212529]' : 'text-[#212529]'}`}>
                     {tool.name}
                   </h4>
                   {!tool.free && (
-                    <Badge variant={isSelected ? "secondary" : "outline"} className="text-xs">
+                    <Badge variant="outline" className="text-xs ml-1 border-[#dee2e6] text-[#6c757d]">
                       Pro
                     </Badge>
                   )}
                 </div>
-                <p className={`text-sm ${isSelected ? 'text-blue-100' : 'text-gray-600'}`}>
-                  {tool.description}
-                </p>
-                <p className={`text-xs mt-1 ${isSelected ? 'text-blue-200' : 'text-gray-500'}`}>
-                  Input: {tool.inputType}
+                <p className="text-xs text-[#6c757d] truncate">
+                  {tool.inputType}
                 </p>
               </div>
             </div>

@@ -30,9 +30,9 @@ const CaptchaComponent: React.FC<CaptchaComponentProps> = ({ onVerify, isRequire
   }
 
   return (
-    <Card className="border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 shadow-lg">
+    <Card className="border-[#dee2e6] bg-white shadow-sm">
       <CardHeader className="pb-3">
-        <CardTitle className="text-sm font-medium text-amber-800 flex items-center gap-2">
+        <CardTitle className="text-sm font-medium text-[#495057] flex items-center gap-2">
           🔒 Security Verification Required
         </CardTitle>
       </CardHeader>
