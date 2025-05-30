@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams, Link } from 'react-router-dom';
 import { Network, ArrowLeft, Play, Copy, Download, RefreshCw } from 'lucide-react';
@@ -60,7 +59,7 @@ const Tools = () => {
   };
 
   const simulateToolExecution = (toolId: string, input: string): string => {
-    const responses = {
+    const responses: Record<string, string | (() => string)> = {
       'blacklist': `Blacklist Check Results for ${input}:
 ✅ Spamhaus SBL: Not Listed
 ✅ Spamhaus CSS: Not Listed  
@@ -157,11 +156,13 @@ PING ${input} (93.184.216.34): 56 data bytes
 round-trip min/avg/max/stddev = 13.8/14.0/14.2/0.2 ms`
     };
 
-    if (typeof responses[toolId as keyof typeof responses] === 'function') {
-      return (responses[toolId as keyof typeof responses] as Function)();
+    // Fix here: Check if the response is a function, and if so, call it
+    const response = responses[toolId as keyof typeof responses];
+    if (typeof response === 'function') {
+      return response();
     }
     
-    return responses[toolId as keyof typeof responses] || `Analysis completed for ${input}.\n\nThis is a simulated result for the ${tool?.name} tool.\nIn a real implementation, this would show actual diagnostic data.`;
+    return response || `Analysis completed for ${input}.\n\nThis is a simulated result for the ${tool?.name} tool.\nIn a real implementation, this would show actual diagnostic data.`;
   };
 
   const handleExecute = async () => {

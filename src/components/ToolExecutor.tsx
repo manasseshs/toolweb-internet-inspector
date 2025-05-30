@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -45,7 +44,7 @@ const ToolExecutor: React.FC<ToolExecutorProps> = ({ selectedTool, toolName, inp
   };
 
   const simulateToolExecution = async (toolId: string, input: string): Promise<string> => {
-    const responses = {
+    const responses: Record<string, string | (() => string)> = {
       'blacklist': `Blacklist Check Results for ${input}:
 ✅ Spamhaus SBL: Not Listed
 ✅ Spamhaus CSS: Not Listed  
@@ -269,11 +268,13 @@ PING ${input} (93.184.216.34): 56 data bytes
 round-trip min/avg/max/stddev = 13.8/14.0/14.2/0.2 ms`
     };
 
-    if (typeof responses[toolId as keyof typeof responses] === 'function') {
-      return (responses[toolId as keyof typeof responses] as Function)();
+    // Fix here: Check if the response is a function, and if so, call it
+    const response = responses[toolId];
+    if (typeof response === 'function') {
+      return response();
     }
     
-    return responses[toolId as keyof typeof responses] || `Analysis completed for ${input}.\n\nThis is a simulated result for the ${toolName} tool.\nIn a real implementation, this would show actual diagnostic data.`;
+    return response || `Analysis completed for ${input}.\n\nThis is a simulated result for the ${toolName} tool.\nIn a real implementation, this would show actual diagnostic data.`;
   };
 
   const handleExecute = async () => {
