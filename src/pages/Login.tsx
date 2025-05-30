@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Network, Mail, Lock, ArrowLeft, AlertCircle } from 'lucide-react';
@@ -139,7 +138,7 @@ const Login = () => {
               </div>
               <Button 
                 type="submit" 
-                className="w-full bg-[#0d6efd] hover:bg-[#0b5ed7] text-white shadow-md"
+                className="w-full bg-blue-500 hover:bg-[#0d6efd] text-white shadow-md"
                 disabled={isLoading}
               >
                 {isLoading ? 'Signing in...' : 'Sign In'}
