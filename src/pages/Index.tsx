@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Network, User, LogIn, Settings } from 'lucide-react';
@@ -41,11 +40,11 @@ const Index = () => {
     'whois': { name: 'WHOIS Lookup', inputType: 'Domain name', free: true },
     'propagation': { name: 'DNS Propagation', inputType: 'Domain name', free: true },
     'smtp-test': { name: 'SMTP Test', inputType: 'SMTP details', free: true },
-    'email-validation': { name: 'Email Validation', inputType: 'Email address', free: true },
-    'deliverability': { name: 'Email Deliverability', inputType: 'Domain name', free: false },
+    'email-validation': { name: 'Email Validation', inputType: 'Email addresses', free: true },
+    'deliverability': { name: 'Email Deliverability', inputType: 'Domain name', free: true },
     'spf-generator': { name: 'SPF Generator', inputType: 'Domain details', free: true },
-    'header-analyzer': { name: 'Header Analyzer', inputType: 'Email headers', free: false },
-    'email-migration': { name: 'Email Migration', inputType: 'IMAP details', free: false }
+    'header-analyzer': { name: 'Header Analyzer', inputType: 'Email headers', free: true },
+    'email-migration': { name: 'Email Migration', inputType: 'IMAP details', free: true }
   };
 
   const getToolInfo = (toolId: string) => {

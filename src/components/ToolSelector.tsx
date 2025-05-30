@@ -12,6 +12,7 @@ interface Tool {
   description: string;
   inputType: string;
   free: boolean;
+  requiresLogin: boolean;
   category: ToolCategory;
 }
 
@@ -24,34 +25,34 @@ interface ToolSelectorProps {
 const ToolSelector: React.FC<ToolSelectorProps> = ({ activeCategory, selectedTool, onToolSelect }) => {
   const tools: Tool[] = [
     // Network & IP Tools
-    { id: 'blacklist', name: 'Blacklist Check', icon: Shield, description: 'Check if IP is blacklisted', inputType: 'IP address', free: true, category: 'network' },
-    { id: 'ptr', name: 'PTR Lookup', icon: Network, description: 'Reverse DNS lookup', inputType: 'IP address', free: true, category: 'network' },
-    { id: 'arin', name: 'ARIN Lookup', icon: Globe, description: 'ASN, country and provider info', inputType: 'IP address', free: true, category: 'network' },
-    { id: 'tcp', name: 'TCP Port Test', icon: Server, description: 'Check if TCP port is open', inputType: 'IP/Domain:Port', free: true, category: 'network' },
-    { id: 'ping', name: 'Ping Test', icon: Zap, description: 'ICMP latency test', inputType: 'IP address', free: true, category: 'network' },
-    { id: 'trace', name: 'Traceroute', icon: Network, description: 'Network path tracing', inputType: 'IP address', free: true, category: 'network' },
-    { id: 'geoip', name: 'GeoIP Lookup', icon: Globe, description: 'Geographic IP location', inputType: 'IP address', free: true, category: 'network' },
+    { id: 'blacklist', name: 'Blacklist Check', icon: Shield, description: 'Check if IP is blacklisted', inputType: 'IP address', free: true, requiresLogin: false, category: 'network' },
+    { id: 'ptr', name: 'PTR Lookup', icon: Network, description: 'Reverse DNS lookup', inputType: 'IP address', free: true, requiresLogin: false, category: 'network' },
+    { id: 'arin', name: 'ARIN Lookup', icon: Globe, description: 'ASN, country and provider info', inputType: 'IP address', free: true, requiresLogin: false, category: 'network' },
+    { id: 'tcp', name: 'TCP Port Test', icon: Server, description: 'Check if TCP port is open', inputType: 'IP/Domain:Port', free: true, requiresLogin: false, category: 'network' },
+    { id: 'ping', name: 'Ping Test', icon: Zap, description: 'ICMP latency test', inputType: 'IP address', free: true, requiresLogin: false, category: 'network' },
+    { id: 'trace', name: 'Traceroute', icon: Network, description: 'Network path tracing', inputType: 'IP address', free: true, requiresLogin: false, category: 'network' },
+    { id: 'geoip', name: 'GeoIP Lookup', icon: Globe, description: 'Geographic IP location', inputType: 'IP address', free: true, requiresLogin: false, category: 'network' },
 
     // DNS & Domain Tools
-    { id: 'a', name: 'A Record', icon: Globe, description: 'Main IP address lookup', inputType: 'Domain name', free: true, category: 'dns' },
-    { id: 'mx', name: 'MX Record', icon: Mail, description: 'Email server records', inputType: 'Domain name', free: true, category: 'dns' },
-    { id: 'spf', name: 'SPF Check', icon: Shield, description: 'SPF record verification', inputType: 'Domain name', free: true, category: 'dns' },
-    { id: 'txt', name: 'TXT Records', icon: Globe, description: 'All TXT records', inputType: 'Domain name', free: true, category: 'dns' },
-    { id: 'cname', name: 'CNAME Lookup', icon: Network, description: 'Alias records', inputType: 'Domain name', free: true, category: 'dns' },
-    { id: 'soa', name: 'SOA Record', icon: Server, description: 'Authority record', inputType: 'Domain name', free: true, category: 'dns' },
-    { id: 'dns', name: 'DNS Diagnostic', icon: Network, description: 'Complete DNS analysis', inputType: 'Domain name', free: false, category: 'dns' },
-    { id: 'dnssec', name: 'DNSSEC Check', icon: Shield, description: 'DNSSEC validation', inputType: 'Domain name', free: true, category: 'dns' },
-    { id: 'https', name: 'HTTPS Test', icon: Shield, description: 'SSL certificate test', inputType: 'Domain name', free: true, category: 'dns' },
-    { id: 'whois', name: 'WHOIS Lookup', icon: Search, description: 'Domain registration data', inputType: 'Domain name', free: true, category: 'dns' },
-    { id: 'propagation', name: 'DNS Propagation', icon: Globe, description: 'Global DNS propagation', inputType: 'Domain name', free: true, category: 'dns' },
+    { id: 'a', name: 'A Record', icon: Globe, description: 'Main IP address lookup', inputType: 'Domain name', free: true, requiresLogin: false, category: 'dns' },
+    { id: 'mx', name: 'MX Record', icon: Mail, description: 'Email server records', inputType: 'Domain name', free: true, requiresLogin: false, category: 'dns' },
+    { id: 'spf', name: 'SPF Check', icon: Shield, description: 'SPF record verification', inputType: 'Domain name', free: true, requiresLogin: false, category: 'dns' },
+    { id: 'txt', name: 'TXT Records', icon: Globe, description: 'All TXT records', inputType: 'Domain name', free: true, requiresLogin: false, category: 'dns' },
+    { id: 'cname', name: 'CNAME Lookup', icon: Network, description: 'Alias records', inputType: 'Domain name', free: true, requiresLogin: false, category: 'dns' },
+    { id: 'soa', name: 'SOA Record', icon: Server, description: 'Authority record', inputType: 'Domain name', free: true, requiresLogin: false, category: 'dns' },
+    { id: 'dns', name: 'DNS Diagnostic', icon: Network, description: 'Complete DNS analysis', inputType: 'Domain name', free: false, requiresLogin: false, category: 'dns' },
+    { id: 'dnssec', name: 'DNSSEC Check', icon: Shield, description: 'DNSSEC validation', inputType: 'Domain name', free: true, requiresLogin: false, category: 'dns' },
+    { id: 'https', name: 'HTTPS Test', icon: Shield, description: 'SSL certificate test', inputType: 'Domain name', free: true, requiresLogin: false, category: 'dns' },
+    { id: 'whois', name: 'WHOIS Lookup', icon: Search, description: 'Domain registration data', inputType: 'Domain name', free: true, requiresLogin: false, category: 'dns' },
+    { id: 'propagation', name: 'DNS Propagation', icon: Globe, description: 'Global DNS propagation', inputType: 'Domain name', free: true, requiresLogin: false, category: 'dns' },
 
-    // Email Tools
-    { id: 'smtp-test', name: 'SMTP Test', icon: Mail, description: 'Test SMTP authentication', inputType: 'SMTP details', free: true, category: 'email' },
-    { id: 'email-validation', name: 'Email Validation', icon: Shield, description: 'Validate email addresses', inputType: 'Email address', free: true, category: 'email' },
-    { id: 'deliverability', name: 'Email Deliverability', icon: Shield, description: 'SPF, DKIM, DMARC analysis', inputType: 'Domain name', free: false, category: 'email' },
-    { id: 'spf-generator', name: 'SPF Generator', icon: Shield, description: 'Generate SPF records', inputType: 'Domain details', free: true, category: 'email' },
-    { id: 'header-analyzer', name: 'Header Analyzer', icon: Search, description: 'Email header analysis', inputType: 'Email headers', free: false, category: 'email' },
-    { id: 'email-migration', name: 'Email Migration', icon: Server, description: 'IMAP email migration', inputType: 'IMAP details', free: false, category: 'email' }
+    // Email Tools - Updated requirements
+    { id: 'smtp-test', name: 'SMTP Test', icon: Mail, description: 'Test SMTP authentication', inputType: 'SMTP details', free: true, requiresLogin: false, category: 'email' },
+    { id: 'email-validation', name: 'Email Validation', icon: Shield, description: 'Validate email addresses', inputType: 'Email addresses', free: true, requiresLogin: true, category: 'email' },
+    { id: 'deliverability', name: 'Email Deliverability', icon: Shield, description: 'SPF, DKIM, DMARC analysis', inputType: 'Domain name', free: true, requiresLogin: false, category: 'email' },
+    { id: 'spf-generator', name: 'SPF Generator', icon: Shield, description: 'Generate SPF records', inputType: 'Domain details', free: true, requiresLogin: false, category: 'email' },
+    { id: 'header-analyzer', name: 'Header Analyzer', icon: Search, description: 'Email header analysis', inputType: 'Email headers', free: true, requiresLogin: false, category: 'email' },
+    { id: 'email-migration', name: 'Email Migration', icon: Server, description: 'IMAP email migration', inputType: 'IMAP details', free: true, requiresLogin: true, category: 'email' }
   ];
 
   const filteredTools = tools.filter(tool => tool.category === activeCategory);
@@ -96,15 +97,26 @@ const ToolSelector: React.FC<ToolSelectorProps> = ({ activeCategory, selectedToo
                     {tool.name}
                   </h4>
                 </div>
-                {!tool.free && (
-                  <Badge variant="outline" className={`text-xs ml-1 ${
-                    isDarkMode 
-                      ? 'border-[#475569] text-[#94a3b8]'
-                      : 'border-[#dee2e6] text-[#6c757d]'
-                  }`}>
-                    Pro
-                  </Badge>
-                )}
+                <div className="flex gap-1">
+                  {!tool.free && (
+                    <Badge variant="outline" className={`text-xs ${
+                      isDarkMode 
+                        ? 'border-[#475569] text-[#94a3b8]'
+                        : 'border-[#dee2e6] text-[#6c757d]'
+                    }`}>
+                      Pro
+                    </Badge>
+                  )}
+                  {tool.requiresLogin && (
+                    <Badge variant="outline" className={`text-xs ${
+                      isDarkMode 
+                        ? 'border-[#475569] text-[#94a3b8]'
+                        : 'border-[#b3d7ff] text-[#0d6efd] bg-[#e7f3ff]'
+                    }`}>
+                      Login
+                    </Badge>
+                  )}
+                </div>
               </div>
               <p className={`text-xs truncate ${
                 isDarkMode ? 'text-[#94a3b8]' : 'text-[#6c757d]'

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams, Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
@@ -39,10 +38,11 @@ const Tools = () => {
     'whois': { name: 'WHOIS Lookup', description: 'Domain registration data', inputType: 'Domain name', free: true },
     'propagation': { name: 'DNS Propagation', description: 'Global DNS propagation', inputType: 'Domain name', free: true },
     'smtp-test': { name: 'SMTP Test', description: 'Test SMTP authentication', inputType: 'SMTP details', free: true },
-    'deliverability': { name: 'Email Deliverability', description: 'SPF, DKIM, DMARC analysis', inputType: 'Domain name', free: false },
+    'email-validation': { name: 'Email Validation', description: 'Validate email addresses', inputType: 'Email addresses', free: true },
+    'deliverability': { name: 'Email Deliverability', description: 'SPF, DKIM, DMARC analysis', inputType: 'Domain name', free: true },
     'spf-generator': { name: 'SPF Generator', description: 'Generate SPF records', inputType: 'Domain details', free: true },
-    'header-analyzer': { name: 'Header Analyzer', description: 'Email header analysis', inputType: 'Email headers', free: false },
-    'email-migration': { name: 'Email Migration', description: 'IMAP email migration', inputType: 'IMAP details', free: false }
+    'header-analyzer': { name: 'Header Analyzer', description: 'Email header analysis', inputType: 'Email headers', free: true },
+    'email-migration': { name: 'Email Migration', description: 'IMAP email migration', inputType: 'IMAP details', free: true }
   };
 
   const tool = toolsInfo[toolId as keyof typeof toolsInfo];
