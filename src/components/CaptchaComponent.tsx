@@ -1,9 +1,7 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
+import ReCAPTCHA from 'react-google-recaptcha';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { RefreshCw } from 'lucide-react';
 
 interface CaptchaComponentProps {
   onVerify: (verified: boolean) => void;
@@ -11,60 +9,21 @@ interface CaptchaComponentProps {
 }
 
 const CaptchaComponent: React.FC<CaptchaComponentProps> = ({ onVerify, isRequired }) => {
-  const [captchaQuestion, setCaptchaQuestion] = useState({ question: '', answer: 0 });
-  const [userAnswer, setUserAnswer] = useState('');
   const [isVerified, setIsVerified] = useState(false);
 
-  const generateCaptcha = () => {
-    const num1 = Math.floor(Math.random() * 10) + 1;
-    const num2 = Math.floor(Math.random() * 10) + 1;
-    const operations = ['+', '-', '*'];
-    const operation = operations[Math.floor(Math.random() * operations.length)];
-    
-    let answer = 0;
-    let question = '';
-    
-    switch (operation) {
-      case '+':
-        answer = num1 + num2;
-        question = `${num1} + ${num2} = ?`;
-        break;
-      case '-':
-        const larger = Math.max(num1, num2);
-        const smaller = Math.min(num1, num2);
-        answer = larger - smaller;
-        question = `${larger} - ${smaller} = ?`;
-        break;
-      case '*':
-        answer = num1 * num2;
-        question = `${num1} × ${num2} = ?`;
-        break;
-    }
-    
-    setCaptchaQuestion({ question, answer });
-    setUserAnswer('');
-    setIsVerified(false);
-    onVerify(false);
-  };
+  // Site key para desenvolvimento - em produção, deve usar uma chave real
+  const RECAPTCHA_SITE_KEY = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"; // Chave de teste do Google
 
-  useEffect(() => {
-    if (isRequired) {
-      generateCaptcha();
-    } else {
-      setIsVerified(true);
-      onVerify(true);
-    }
-  }, [isRequired]);
-
-  const handleVerify = () => {
-    const verified = parseInt(userAnswer) === captchaQuestion.answer;
+  const handleRecaptchaChange = useCallback((token: string | null) => {
+    const verified = !!token;
     setIsVerified(verified);
     onVerify(verified);
-    
-    if (!verified) {
-      generateCaptcha();
-    }
-  };
+  }, [onVerify]);
+
+  const handleRecaptchaExpired = useCallback(() => {
+    setIsVerified(false);
+    onVerify(false);
+  }, [onVerify]);
 
   if (!isRequired) {
     return null;
@@ -79,41 +38,18 @@ const CaptchaComponent: React.FC<CaptchaComponentProps> = ({ onVerify, isRequire
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
-          <div className="flex items-center gap-3">
-            <span className="text-lg font-mono bg-white px-4 py-3 rounded-lg border border-amber-200 shadow-sm">
-              {captchaQuestion.question}
-            </span>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={generateCaptcha}
-              className="px-3 border-amber-300 hover:bg-amber-50"
-            >
-              <RefreshCw className="w-4 h-4" />
-            </Button>
-          </div>
-          
-          <div className="flex gap-2">
-            <Input
-              type="number"
-              placeholder="Your answer"
-              value={userAnswer}
-              onChange={(e) => setUserAnswer(e.target.value)}
-              className="w-32 border-amber-200 focus:border-amber-400"
-              onKeyPress={(e) => e.key === 'Enter' && handleVerify()}
+          <div className="flex flex-col items-center gap-3">
+            <ReCAPTCHA
+              sitekey={RECAPTCHA_SITE_KEY}
+              onChange={handleRecaptchaChange}
+              onExpired={handleRecaptchaExpired}
+              theme="light"
+              size="normal"
             />
-            <Button 
-              onClick={handleVerify}
-              disabled={!userAnswer}
-              className="bg-amber-500 hover:bg-amber-600 text-white shadow-md"
-            >
-              Verify
-            </Button>
           </div>
           
           {isVerified && (
-            <div className="text-green-600 text-sm font-medium flex items-center gap-2">
+            <div className="text-green-600 text-sm font-medium flex items-center gap-2 justify-center">
               ✅ Verified! You can now proceed.
             </div>
           )}
