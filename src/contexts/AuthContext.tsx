@@ -6,6 +6,9 @@ import { supabase } from '@/integrations/supabase/client';
 interface AuthUser extends User {
   plan?: 'free' | 'pro' | 'enterprise';
   planExpiry?: string;
+  subscribed?: boolean;
+  subscription_tier?: string;
+  subscription_end?: string;
 }
 
 interface AuthContextType {
@@ -15,6 +18,7 @@ interface AuthContextType {
   register: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
   updatePlan: (plan: 'free' | 'pro' | 'enterprise', expiry?: string) => void;
+  checkSubscription: () => Promise<void>;
   loading: boolean;
 }
 
@@ -37,6 +41,36 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const checkSubscription = async () => {
+    if (!session) return;
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('check-subscription', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (error) {
+        console.error('Error checking subscription:', error);
+        return;
+      }
+
+      if (user && data) {
+        const updatedUser = {
+          ...user,
+          subscribed: data.subscribed,
+          subscription_tier: data.subscription_tier,
+          subscription_end: data.subscription_end,
+          plan: data.subscribed ? (data.subscription_tier as 'pro' | 'enterprise') : 'free'
+        };
+        setUser(updatedUser);
+      }
+    } catch (error) {
+      console.error('Error checking subscription:', error);
+    }
+  };
+
   useEffect(() => {
     // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -49,6 +83,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             plan: 'free' as const
           };
           setUser(authUser);
+          
+          // Check subscription status after login
+          if (event === 'SIGNED_IN') {
+            setTimeout(() => {
+              checkSubscription();
+            }, 1000);
+          }
         } else {
           setUser(null);
         }
@@ -65,6 +106,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           plan: 'free' as const
         };
         setUser(authUser);
+        // Check subscription for existing session
+        setTimeout(() => {
+          checkSubscription();
+        }, 1000);
       }
       setLoading(false);
     });
@@ -136,6 +181,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       register, 
       logout, 
       updatePlan, 
+      checkSubscription,
       loading 
     }}>
       {children}

@@ -8,10 +8,12 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const Pricing = () => {
   const [isAnnual, setIsAnnual] = useState(false);
-  const { user, updatePlan } = useAuth();
+  const [loading, setLoading] = useState<string | null>(null);
+  const { user, session, checkSubscription } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -21,6 +23,7 @@ const Pricing = () => {
       name: 'Free',
       icon: Star,
       price: { monthly: 0, annual: 0 },
+      priceId: { monthly: null, annual: null },
       description: 'Perfect for getting started',
       features: [
         '10 emails verification per day',
@@ -40,6 +43,10 @@ const Pricing = () => {
       name: 'Pro',
       icon: Zap,
       price: { monthly: 9, annual: 90 },
+      priceId: { 
+        monthly: 'price_1QhxYYCn5VlJ2hQlqLGXCgAB', // Replace with your actual Stripe price ID
+        annual: 'price_1QhxYYCn5VlJ2hQlqLGXCgAC'   // Replace with your actual Stripe price ID
+      },
       description: 'For professionals and teams',
       popular: true,
       features: [
@@ -62,6 +69,10 @@ const Pricing = () => {
       name: 'Enterprise',
       icon: Crown,
       price: { monthly: 19, annual: 190 },
+      priceId: { 
+        monthly: 'price_1QhxYYCn5VlJ2hQlqLGXCgAD', // Replace with your actual Stripe price ID
+        annual: 'price_1QhxYYCn5VlJ2hQlqLGXCgAE'   // Replace with your actual Stripe price ID
+      },
       description: 'For large organizations',
       features: [
         '1,000,000 email verifications per month',
@@ -92,31 +103,76 @@ const Pricing = () => {
       return;
     }
 
-    // Simulate Stripe integration
-    toast({
-      title: "Redirecting to payment...",
-      description: "You'll be redirected to Stripe checkout.",
-    });
+    if (!session) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to subscribe to a plan.",
+        variant: "destructive",
+      });
+      navigate('/login');
+      return;
+    }
 
-    // Simulate payment success
-    setTimeout(() => {
-      if (user) {
-        const expiry = new Date();
-        expiry.setMonth(expiry.getMonth() + (isAnnual ? 12 : 1));
-        updatePlan(planId as 'pro' | 'enterprise', expiry.toISOString());
+    const plan = plans.find(p => p.id === planId);
+    if (!plan?.priceId) {
+      toast({
+        title: "Error",
+        description: "Invalid plan selected.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const priceId = isAnnual ? plan.priceId.annual : plan.priceId.monthly;
+    if (!priceId) {
+      toast({
+        title: "Error",
+        description: "Price ID not configured for this plan.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(planId);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: {
+          priceId,
+          planName: plan.name
+        },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data?.url) {
+        // Open Stripe checkout in a new tab
+        window.open(data.url, '_blank');
         
         toast({
-          title: "Subscription activated!",
-          description: `Welcome to ${planId.charAt(0).toUpperCase() + planId.slice(1)} plan!`,
+          title: "Redirecting to checkout",
+          description: "Opening Stripe checkout in a new tab...",
         });
-        
-        navigate('/dashboard');
       }
-    }, 2000);
+    } catch (error: any) {
+      console.error('Subscription error:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create checkout session",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(null);
+    }
   };
 
   const getCurrentPlan = () => {
-    return user?.plan || 'free';
+    return user?.subscription_tier || user?.plan || 'free';
   };
 
   return (
@@ -207,6 +263,7 @@ const Pricing = () => {
             const isCurrentPlan = currentPlan === plan.id;
             const price = isAnnual ? plan.price.annual : plan.price.monthly;
             const PlanIcon = plan.icon;
+            const isLoading = loading === plan.id;
 
             return (
               <Card 
@@ -265,13 +322,16 @@ const Pricing = () => {
                   ) : (
                     <Button
                       onClick={() => handleSubscribe(plan.id, price)}
+                      disabled={isLoading}
                       className={`w-full ${
                         plan.id === 'free' 
                           ? 'bg-gray-100 hover:bg-gray-200 text-gray-800' 
                           : 'bg-blue-500 hover:bg-blue-600 text-white'
                       }`}
                     >
-                      {plan.id === 'free' ? (
+                      {isLoading ? (
+                        'Loading...'
+                      ) : plan.id === 'free' ? (
                         'Get Started'
                       ) : (
                         <>
@@ -289,7 +349,7 @@ const Pricing = () => {
 
         {/* FAQ Section */}
         <div className="max-w-4xl mx-auto mt-16">
-          <h2 className="text-3xl font-bold text-white text-center mb-8">Frequently Asked Questions</h2>
+          <h2 className="text-3xl font-bold text-gray-900 text-center mb-8">Frequently Asked Questions</h2>
           <div className="grid md:grid-cols-2 gap-6">
             {[
               {
@@ -309,12 +369,12 @@ const Pricing = () => {
                 answer: "Yes, you can change your plan at any time. Upgrades take effect immediately, and downgrades at the next billing cycle."
               }
             ].map((faq, index) => (
-              <Card key={index} className="bg-gray-800/30 border-gray-700">
+              <Card key={index} className="bg-white border-gray-200">
                 <CardHeader>
-                  <CardTitle className="text-white text-lg">{faq.question}</CardTitle>
+                  <CardTitle className="text-gray-900 text-lg">{faq.question}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-400">{faq.answer}</p>
+                  <p className="text-gray-600">{faq.answer}</p>
                 </CardContent>
               </Card>
             ))}
