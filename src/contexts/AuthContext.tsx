@@ -57,12 +57,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       if (user && data) {
-        const updatedUser = {
+        // Ensure proper type casting for plan
+        let plan: 'free' | 'pro' | 'enterprise' = 'free';
+        if (data.subscribed && data.subscription_tier) {
+          switch (data.subscription_tier.toLowerCase()) {
+            case 'pro':
+              plan = 'pro';
+              break;
+            case 'enterprise':
+              plan = 'enterprise';
+              break;
+            default:
+              plan = 'free';
+              break;
+          }
+        }
+
+        const updatedUser: AuthUser = {
           ...user,
           subscribed: data.subscribed,
           subscription_tier: data.subscription_tier,
           subscription_end: data.subscription_end,
-          plan: data.subscribed ? (data.subscription_tier as 'pro' | 'enterprise') : 'free'
+          plan
         };
         setUser(updatedUser);
       }
@@ -78,9 +94,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         console.log('Auth state changed:', event, session);
         setSession(session);
         if (session?.user) {
-          const authUser = {
+          const authUser: AuthUser = {
             ...session.user,
-            plan: 'free' as const
+            plan: 'free'
           };
           setUser(authUser);
           
@@ -101,9 +117,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session?.user) {
-        const authUser = {
+        const authUser: AuthUser = {
           ...session.user,
-          plan: 'free' as const
+          plan: 'free'
         };
         setUser(authUser);
         // Check subscription for existing session
@@ -168,7 +184,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const updatePlan = (plan: 'free' | 'pro' | 'enterprise', expiry?: string) => {
     if (user) {
-      const updatedUser = { ...user, plan, planExpiry: expiry };
+      const updatedUser: AuthUser = { ...user, plan, planExpiry: expiry };
       setUser(updatedUser);
     }
   };
