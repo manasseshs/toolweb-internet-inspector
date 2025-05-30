@@ -23,21 +23,21 @@ const Tools = () => {
     'blacklist': { name: 'Blacklist Check', description: 'Check if IP is on spam blacklists', inputType: 'IP address', free: true },
     'ptr': { name: 'PTR Lookup', description: 'Reverse DNS lookup', inputType: 'IP address', free: true },
     'arin': { name: 'ARIN Lookup', description: 'ASN, country and provider info', inputType: 'IP address', free: true },
-    'tcp': { name: 'TCP Port Test', description: 'Check if TCP port is open', inputType: 'IP:Port', free: true },
+    'tcp': { name: 'TCP Port Test', description: 'Check if TCP port is open', inputType: 'IP/Domain:Port', free: true },
     'ping': { name: 'Ping Test', description: 'ICMP latency test', inputType: 'IP address or domain', free: true },
-    'trace': { name: 'Traceroute', description: 'Network path tracing', inputType: 'IP address or domain', free: false },
+    'trace': { name: 'Traceroute', description: 'Network path tracing', inputType: 'IP address or domain', free: true },
     'geoip': { name: 'GeoIP Lookup', description: 'Geographic IP location', inputType: 'IP address', free: true },
     'a': { name: 'A Record', description: 'Main IP address lookup', inputType: 'Domain name', free: true },
     'mx': { name: 'MX Record', description: 'Email server records', inputType: 'Domain name', free: true },
     'spf': { name: 'SPF Check', description: 'SPF record verification', inputType: 'Domain name', free: true },
     'txt': { name: 'TXT Records', description: 'All TXT records', inputType: 'Domain name', free: true },
     'cname': { name: 'CNAME Lookup', description: 'Alias records', inputType: 'Domain name', free: true },
-    'soa': { name: 'SOA Record', description: 'Authority record', inputType: 'Domain name', free: false },
+    'soa': { name: 'SOA Record', description: 'Authority record', inputType: 'Domain name', free: true },
     'dns': { name: 'DNS Diagnostic', description: 'Complete DNS analysis', inputType: 'Domain name', free: false },
-    'dnssec': { name: 'DNSSEC Check', description: 'DNSSEC validation', inputType: 'Domain name', free: false },
+    'dnssec': { name: 'DNSSEC Check', description: 'DNSSEC validation', inputType: 'Domain name', free: true },
     'https': { name: 'HTTPS Test', description: 'SSL certificate test', inputType: 'Domain name', free: true },
     'whois': { name: 'WHOIS Lookup', description: 'Domain registration data', inputType: 'Domain name', free: true },
-    'propagation': { name: 'DNS Propagation', description: 'Global DNS propagation', inputType: 'Domain name', free: false },
+    'propagation': { name: 'DNS Propagation', description: 'Global DNS propagation', inputType: 'Domain name', free: true },
     'smtp-test': { name: 'SMTP Test', description: 'Test SMTP authentication', inputType: 'SMTP details', free: true },
     'deliverability': { name: 'Email Deliverability', description: 'SPF, DKIM, DMARC analysis', inputType: 'Domain name', free: false },
     'spf-generator': { name: 'SPF Generator', description: 'Generate SPF records', inputType: 'Domain details', free: true },
@@ -72,6 +72,72 @@ const Tools = () => {
 
 Status: CLEAN - No blacklists detected`,
 
+      'tcp': () => {
+        const parts = input.split(':');
+        const host = parts[0] || input;
+        const port = parts[1] || '80';
+        return `TCP Port Test Results for ${host}:${port}:
+
+Connection Test: ✅ SUCCESS
+Response Time: 23ms
+Port Status: OPEN
+Service Detection: HTTP/HTTPS Server
+Banner Grab: "Server: nginx/1.18.0"
+
+Network Path:
+Hop 1: Local Gateway (192.168.1.1) - 2ms
+Hop 2: ISP Router (10.0.0.1) - 15ms 
+Hop 3: Target Host (${host}) - 23ms
+
+Summary: Port ${port} is accessible and responding`;
+      },
+
+      'whois': () => `WHOIS Information for ${input}:
+
+Domain Information:
+Domain Name: ${input.toUpperCase()}
+Registry Domain ID: 2336799_DOMAIN_COM-VRSN
+Registrar WHOIS Server: whois.registrar-servers.com
+Registrar URL: http://www.registrar.com
+Updated Date: 2024-01-15T10:30:45Z
+Creation Date: 2020-08-14T04:00:00Z
+Registry Expiry Date: 2025-08-13T04:00:00Z
+Registrar: Example Registrar, Inc.
+Registrar IANA ID: 1234
+
+Registrant Information:
+Organization: Example Corporation
+Country: US
+State/Province: California
+City: San Francisco
+Postal Code: 94102
+
+Administrative Contact:
+Name: John Smith
+Email: admin@${input}
+Phone: +1.4155551234
+
+Technical Contact:
+Name: Tech Support
+Email: tech@${input}
+Phone: +1.4155555678
+
+Name Servers:
+ns1.${input}
+ns2.${input}
+ns3.cloudflare.com
+ns4.cloudflare.com
+
+Domain Status:
+clientTransferProhibited
+clientUpdateProhibited
+clientDeleteProhibited
+
+DNSSEC: signedDelegation
+
+Last Updated: 2024-05-30T12:00:00Z
+Query Time: 156ms`,
+
       'mx': `MX Records for ${input}:
 Priority: 10    Mail Server: mail1.${input}
 Priority: 20    Mail Server: mail2.${input}
@@ -88,20 +154,13 @@ PING ${input} (93.184.216.34): 56 data bytes
 
 --- ${input} ping statistics ---
 4 packets transmitted, 4 packets received, 0.0% packet loss
-round-trip min/avg/max/stddev = 13.8/14.0/14.2/0.2 ms`,
-
-      'whois': `WHOIS Information for ${input}:
-Domain Name: ${input.toUpperCase()}
-Registry Domain ID: 2336799_DOMAIN_COM-VRSN
-Registrar WHOIS Server: whois.iana.org
-Creation Date: 1995-08-14T04:00:00Z
-Registry Expiry Date: 2030-08-13T04:00:00Z
-Registrar: Internet Assigned Numbers Authority
-Name Server: A.IANA-SERVERS.NET
-Name Server: B.IANA-SERVERS.NET
-DNSSEC: unsigned`
+round-trip min/avg/max/stddev = 13.8/14.0/14.2/0.2 ms`
     };
 
+    if (typeof responses[toolId as keyof typeof responses] === 'function') {
+      return (responses[toolId as keyof typeof responses] as Function)();
+    }
+    
     return responses[toolId as keyof typeof responses] || `Analysis completed for ${input}.\n\nThis is a simulated result for the ${tool?.name} tool.\nIn a real implementation, this would show actual diagnostic data.`;
   };
 

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Shield, Network, Globe, Mail, Server, Zap, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -26,9 +27,9 @@ const ToolSelector: React.FC<ToolSelectorProps> = ({ activeCategory, selectedToo
     { id: 'blacklist', name: 'Blacklist Check', icon: Shield, description: 'Check if IP is blacklisted', inputType: 'IP address', free: true, category: 'network' },
     { id: 'ptr', name: 'PTR Lookup', icon: Network, description: 'Reverse DNS lookup', inputType: 'IP address', free: true, category: 'network' },
     { id: 'arin', name: 'ARIN Lookup', icon: Globe, description: 'ASN, country and provider info', inputType: 'IP address', free: true, category: 'network' },
-    { id: 'tcp', name: 'TCP Port Test', icon: Server, description: 'Check if TCP port is open', inputType: 'IP:Port', free: true, category: 'network' },
+    { id: 'tcp', name: 'TCP Port Test', icon: Server, description: 'Check if TCP port is open', inputType: 'IP/Domain:Port', free: true, category: 'network' },
     { id: 'ping', name: 'Ping Test', icon: Zap, description: 'ICMP latency test', inputType: 'IP address', free: true, category: 'network' },
-    { id: 'trace', name: 'Traceroute', icon: Network, description: 'Network path tracing', inputType: 'IP address', free: false, category: 'network' },
+    { id: 'trace', name: 'Traceroute', icon: Network, description: 'Network path tracing', inputType: 'IP address', free: true, category: 'network' },
     { id: 'geoip', name: 'GeoIP Lookup', icon: Globe, description: 'Geographic IP location', inputType: 'IP address', free: true, category: 'network' },
 
     // DNS & Domain Tools
@@ -37,12 +38,12 @@ const ToolSelector: React.FC<ToolSelectorProps> = ({ activeCategory, selectedToo
     { id: 'spf', name: 'SPF Check', icon: Shield, description: 'SPF record verification', inputType: 'Domain name', free: true, category: 'dns' },
     { id: 'txt', name: 'TXT Records', icon: Globe, description: 'All TXT records', inputType: 'Domain name', free: true, category: 'dns' },
     { id: 'cname', name: 'CNAME Lookup', icon: Network, description: 'Alias records', inputType: 'Domain name', free: true, category: 'dns' },
-    { id: 'soa', name: 'SOA Record', icon: Server, description: 'Authority record', inputType: 'Domain name', free: false, category: 'dns' },
+    { id: 'soa', name: 'SOA Record', icon: Server, description: 'Authority record', inputType: 'Domain name', free: true, category: 'dns' },
     { id: 'dns', name: 'DNS Diagnostic', icon: Network, description: 'Complete DNS analysis', inputType: 'Domain name', free: false, category: 'dns' },
-    { id: 'dnssec', name: 'DNSSEC Check', icon: Shield, description: 'DNSSEC validation', inputType: 'Domain name', free: false, category: 'dns' },
+    { id: 'dnssec', name: 'DNSSEC Check', icon: Shield, description: 'DNSSEC validation', inputType: 'Domain name', free: true, category: 'dns' },
     { id: 'https', name: 'HTTPS Test', icon: Shield, description: 'SSL certificate test', inputType: 'Domain name', free: true, category: 'dns' },
     { id: 'whois', name: 'WHOIS Lookup', icon: Search, description: 'Domain registration data', inputType: 'Domain name', free: true, category: 'dns' },
-    { id: 'propagation', name: 'DNS Propagation', icon: Globe, description: 'Global DNS propagation', inputType: 'Domain name', free: false, category: 'dns' },
+    { id: 'propagation', name: 'DNS Propagation', icon: Globe, description: 'Global DNS propagation', inputType: 'Domain name', free: true, category: 'dns' },
 
     // Email Tools
     { id: 'smtp-test', name: 'SMTP Test', icon: Mail, description: 'Test SMTP authentication', inputType: 'SMTP details', free: true, category: 'email' },
