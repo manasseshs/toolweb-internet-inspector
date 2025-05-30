@@ -9,24 +9,93 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      notifications: {
+        Row: {
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          is_global: boolean | null
+          is_read: boolean | null
+          message: string
+          target_user_id: string | null
+          title: string
+          type: Database["public"]["Enums"]["notification_type"] | null
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          is_global?: boolean | null
+          is_read?: boolean | null
+          message: string
+          target_user_id?: string | null
+          title: string
+          type?: Database["public"]["Enums"]["notification_type"] | null
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          is_global?: boolean | null
+          is_read?: boolean | null
+          message?: string
+          target_user_id?: string | null
+          title?: string
+          type?: Database["public"]["Enums"]["notification_type"] | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
           email: string
           id: string
+          is_admin: boolean | null
+          status: Database["public"]["Enums"]["user_status"] | null
           updated_at: string
         }
         Insert: {
           created_at?: string
           email: string
           id: string
+          is_admin?: boolean | null
+          status?: Database["public"]["Enums"]["user_status"] | null
           updated_at?: string
         }
         Update: {
           created_at?: string
           email?: string
           id?: string
+          is_admin?: boolean | null
+          status?: Database["public"]["Enums"]["user_status"] | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      service_controls: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          is_enabled: boolean | null
+          service_name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          service_name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          service_name?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -62,10 +131,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      mark_notification_read: {
+        Args: { notification_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
-      [_ in never]: never
+      notification_type: "general" | "new_tool" | "service_update"
+      user_status: "active" | "disabled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -180,6 +253,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      notification_type: ["general", "new_tool", "service_update"],
+      user_status: ["active", "disabled"],
+    },
   },
 } as const
