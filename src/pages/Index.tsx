@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Network, User, LogIn, Settings } from 'lucide-react';
@@ -96,7 +95,7 @@ const Index = () => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         {/* Hero Section */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-8">
           <div className="mb-6">
             {/* Robot Mascot */}
             <div className="w-20 h-20 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl">
@@ -125,15 +124,13 @@ const Index = () => {
         </div>
 
         {/* Tool Categories Navigation */}
-        <div className="mb-8">
-          <TabNavigation 
-            activeTab={activeTab} 
-            onTabChange={setActiveTab} 
-          />
-        </div>
+        <TabNavigation 
+          activeTab={activeTab} 
+          onTabChange={setActiveTab} 
+        />
 
         {/* Tool Selection */}
-        <Card className="mb-8 border-slate-200 shadow-lg bg-white/60 backdrop-blur-sm">
+        <Card className="mt-8 mb-8 border-slate-200 shadow-lg bg-white/60 backdrop-blur-sm">
           <CardHeader className="bg-gradient-to-r from-slate-50 to-blue-50 rounded-t-lg">
             <CardTitle className="text-slate-800 text-xl">Select Tool</CardTitle>
             <CardDescription className="text-slate-600">

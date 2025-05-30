@@ -77,6 +77,16 @@
     @apply bg-gray-500;
   }
 
+  /* Hide scrollbar for horizontal navigation */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
   /* Selection styles */
   ::selection {
     @apply bg-blue-500/30 text-white;
