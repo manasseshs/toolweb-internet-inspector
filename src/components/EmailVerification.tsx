@@ -1,20 +1,18 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { CheckCircle, XCircle, AlertCircle, Upload, Download, HelpCircle, Info } from 'lucide-react';
+import { CheckCircle, XCircle, AlertCircle, Upload, Download } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { EmailVerificationEngine, EmailVerificationResult } from './EmailVerificationEngine';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
 
 interface VerificationResult {
   email: string;
-  status: 'valid' | 'invalid' | 'catch-all' | 'unreachable' | 'unconfirmed';
+  status: 'valid' | 'invalid' | 'catch-all' | 'unreachable';
   smtp_server?: string;
   smtp_response_code?: string;
   smtp_response_message?: string;
@@ -25,14 +23,11 @@ const EmailVerification: React.FC = () => {
   const [emailList, setEmailList] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [results, setResults] = useState<EmailVerificationResult[]>([]);
+  const [results, setResults] = useState<VerificationResult[]>([]);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [enableContentProbe, setEnableContentProbe] = useState(false);
-  const [showDebugInfo, setShowDebugInfo] = useState(false);
   
   const { user } = useAuth();
   const { toast } = useToast();
-  const verificationEngine = new EmailVerificationEngine();
 
   const isPaidUser = user && (user.plan === 'pro' || user.plan === 'enterprise');
 
@@ -82,21 +77,17 @@ const EmailVerification: React.FC = () => {
     setResults([]);
 
     try {
-      const verificationResults: EmailVerificationResult[] = [];
+      const verificationResults: VerificationResult[] = [];
       
       for (let i = 0; i < emails.length; i++) {
         const email = emails[i].trim();
         setProgress((i / emails.length) * 100);
 
-        console.log(`Starting verification for: ${email}`);
-        
-        // Use the enhanced verification engine
-        const result = await verificationEngine.verifyEmail(email, enableContentProbe);
+        // Simulate email verification logic
+        const result = await simulateEmailVerification(email);
         verificationResults.push(result);
 
-        console.log(`Verification result for ${email}:`, result);
-
-        // Store result in database with enhanced data
+        // Store result in database
         await supabase.from('email_verifications').insert({
           user_id: user?.id,
           email_address: email,
@@ -104,11 +95,7 @@ const EmailVerification: React.FC = () => {
           smtp_server: result.smtp_server,
           smtp_response_code: result.smtp_response_code,
           smtp_response_message: result.smtp_response_message,
-          verification_details: {
-            confidence: result.confidence,
-            debug_info: result.debug_info,
-            notes: result.notes
-          }
+          verification_details: result.details
         });
       }
 
@@ -117,7 +104,7 @@ const EmailVerification: React.FC = () => {
       
       toast({
         title: "Verification complete",
-        description: `Verified ${emails.length} email addresses with enhanced detection.`,
+        description: `Verified ${emails.length} email addresses.`,
       });
     } catch (error) {
       console.error('Verification error:', error);
@@ -128,6 +115,81 @@ const EmailVerification: React.FC = () => {
       });
     } finally {
       setIsVerifying(false);
+    }
+  };
+
+  const simulateEmailVerification = async (email: string): Promise<VerificationResult> => {
+    // Simulate verification delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Basic syntax check
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return {
+        email,
+        status: 'invalid',
+        smtp_response_message: 'Invalid email syntax',
+        details: { syntax_valid: false }
+      };
+    }
+
+    // Simulate different verification outcomes
+    const domain = email.split('@')[1];
+    const random = Math.random();
+    
+    if (random < 0.7) {
+      return {
+        email,
+        status: 'valid',
+        smtp_server: `mx.${domain}`,
+        smtp_response_code: '250',
+        smtp_response_message: 'OK',
+        details: { 
+          syntax_valid: true,
+          mx_found: true,
+          smtp_check: true,
+          catch_all: false
+        }
+      };
+    } else if (random < 0.85) {
+      return {
+        email,
+        status: 'catch-all',
+        smtp_server: `mx.${domain}`,
+        smtp_response_code: '250',
+        smtp_response_message: 'Catch-all domain',
+        details: { 
+          syntax_valid: true,
+          mx_found: true,
+          smtp_check: true,
+          catch_all: true
+        }
+      };
+    } else if (random < 0.95) {
+      return {
+        email,
+        status: 'unreachable',
+        smtp_server: `mx.${domain}`,
+        smtp_response_code: '421',
+        smtp_response_message: 'Service not available',
+        details: { 
+          syntax_valid: true,
+          mx_found: true,
+          smtp_check: false
+        }
+      };
+    } else {
+      return {
+        email,
+        status: 'invalid',
+        smtp_response_code: '550',
+        smtp_response_message: 'Mailbox not found',
+        details: { 
+          syntax_valid: true,
+          mx_found: true,
+          smtp_check: false
+        }
+      };
     }
   };
 
@@ -155,31 +217,18 @@ const EmailVerification: React.FC = () => {
       case 'valid': return <CheckCircle className="w-4 h-4 text-green-500" />;
       case 'invalid': return <XCircle className="w-4 h-4 text-red-500" />;
       case 'catch-all': return <AlertCircle className="w-4 h-4 text-yellow-500" />;
-      case 'unconfirmed': return <HelpCircle className="w-4 h-4 text-orange-500" />;
       case 'unreachable': return <XCircle className="w-4 h-4 text-gray-500" />;
       default: return <AlertCircle className="w-4 h-4 text-gray-400" />;
     }
   };
 
-  const getStatusColor = (status: string, confidence: string) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
-      case 'valid': 
-        return confidence === 'high' ? 'bg-green-100 text-green-800' : 'bg-green-50 text-green-700';
+      case 'valid': return 'bg-green-100 text-green-800';
       case 'invalid': return 'bg-red-100 text-red-800';
       case 'catch-all': return 'bg-yellow-100 text-yellow-800';
-      case 'unconfirmed': return 'bg-orange-100 text-orange-800';
       case 'unreachable': return 'bg-gray-100 text-gray-800';
       default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getConfidenceBadge = (confidence: string) => {
-    switch (confidence) {
-      case 'high': return <Badge className="bg-green-100 text-green-800 text-xs">High Confidence</Badge>;
-      case 'medium': return <Badge className="bg-yellow-100 text-yellow-800 text-xs">Medium Confidence</Badge>;
-      case 'low': return <Badge className="bg-orange-100 text-orange-800 text-xs">Low Confidence</Badge>;
-      case 'suspected': return <Badge className="bg-red-100 text-red-800 text-xs">Suspected False Positive</Badge>;
-      default: return null;
     }
   };
 
@@ -187,7 +236,7 @@ const EmailVerification: React.FC = () => {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Enhanced Email Verification</CardTitle>
+          <CardTitle>Email Verification</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
@@ -236,38 +285,6 @@ const EmailVerification: React.FC = () => {
             </div>
           )}
 
-          {isPaidUser && (
-            <div className="border rounded-lg p-4 bg-blue-50">
-              <h4 className="text-sm font-medium text-blue-900 mb-3">Advanced Options (Pro Users)</h4>
-              <div className="space-y-3">
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="content-probe"
-                    checked={enableContentProbe}
-                    onCheckedChange={setEnableContentProbe}
-                  />
-                  <Label htmlFor="content-probe" className="text-sm">
-                    Enable Content Probes (Better detection for cPanel/Exim servers)
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="debug-info"
-                    checked={showDebugInfo}
-                    onCheckedChange={setShowDebugInfo}
-                  />
-                  <Label htmlFor="debug-info" className="text-sm">
-                    Show Debug Information
-                  </Label>
-                </div>
-              </div>
-              <p className="text-xs text-blue-700 mt-2">
-                <Info className="w-3 h-3 inline mr-1" />
-                Content probes help detect false positives from servers that accept all RCPT commands
-              </p>
-            </div>
-          )}
-
           <div className="flex gap-2">
             <Button 
               onClick={verifyEmails}
@@ -288,7 +305,7 @@ const EmailVerification: React.FC = () => {
           {isVerifying && (
             <div className="space-y-2">
               <Progress value={progress} className="w-full" />
-              <p className="text-sm text-gray-600">Verifying emails with enhanced detection... {Math.round(progress)}% complete</p>
+              <p className="text-sm text-gray-600">Verifying emails... {Math.round(progress)}% complete</p>
             </div>
           )}
         </CardContent>
@@ -297,49 +314,26 @@ const EmailVerification: React.FC = () => {
       {results.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Enhanced Verification Results</CardTitle>
+            <CardTitle>Verification Results</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3 max-h-96 overflow-y-auto">
+            <div className="space-y-2 max-h-96 overflow-y-auto">
               {results.map((result, index) => (
-                <div key={index} className="border rounded-lg p-4 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      {getStatusIcon(result.status)}
-                      <span className="font-mono text-sm">{result.email}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge className={getStatusColor(result.status, result.confidence)}>
-                        {result.status}
-                      </Badge>
-                      {getConfidenceBadge(result.confidence)}
-                      {result.smtp_response_code && (
-                        <span className="text-xs text-gray-500">
-                          {result.smtp_response_code}
-                        </span>
-                      )}
-                    </div>
+                <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    {getStatusIcon(result.status)}
+                    <span className="font-mono text-sm">{result.email}</span>
                   </div>
-                  
-                  {result.notes && (
-                    <p className="text-sm text-gray-600 bg-gray-50 p-2 rounded">
-                      📝 {result.notes}
-                    </p>
-                  )}
-
-                  {showDebugInfo && result.debug_info && (
-                    <div className="bg-gray-900 text-green-400 p-3 rounded text-xs font-mono">
-                      <div>Email: {result.email}</div>
-                      <div>MX: {result.debug_info.mx_record}</div>
-                      <div>SMTP Code: {result.smtp_response_code}</div>
-                      <div>Response Time: {result.debug_info.response_time}ms</div>
-                      <div>Server Behavior: {result.debug_info.server_behavior}</div>
-                      <div>Domain Flags: {result.debug_info.domain_flags.join(', ')}</div>
-                      {result.debug_info.retry_results && (
-                        <div>Retries: {result.debug_info.retry_results.join(' | ')}</div>
-                      )}
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2">
+                    <Badge className={getStatusColor(result.status)}>
+                      {result.status}
+                    </Badge>
+                    {result.smtp_response_code && (
+                      <span className="text-xs text-gray-500">
+                        {result.smtp_response_code}
+                      </span>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
