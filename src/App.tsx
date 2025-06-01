@@ -10,7 +10,6 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Pricing from "./pages/Pricing";
-import Tools from "./pages/Tools";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
@@ -29,9 +28,33 @@ const App = () => (
             <Route path="/register" element={<Register />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/pricing" element={<Pricing />} />
-            <Route path="/tools/:toolId" element={<Tools />} />
             <Route path="/admin" element={<Admin />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            {/* Tool routes - all render within Index layout */}
+            <Route path="/blacklist-check" element={<Index />} />
+            <Route path="/ptr-lookup" element={<Index />} />
+            <Route path="/arin-lookup" element={<Index />} />
+            <Route path="/tcp-port-test" element={<Index />} />
+            <Route path="/ping-test" element={<Index />} />
+            <Route path="/traceroute" element={<Index />} />
+            <Route path="/geoip-lookup" element={<Index />} />
+            <Route path="/a-record" element={<Index />} />
+            <Route path="/mx-record" element={<Index />} />
+            <Route path="/spf-check" element={<Index />} />
+            <Route path="/txt-records" element={<Index />} />
+            <Route path="/cname-lookup" element={<Index />} />
+            <Route path="/soa-record" element={<Index />} />
+            <Route path="/dns-diagnostic" element={<Index />} />
+            <Route path="/dnssec-check" element={<Index />} />
+            <Route path="/https-test" element={<Index />} />
+            <Route path="/whois-lookup" element={<Index />} />
+            <Route path="/dns-propagation" element={<Index />} />
+            <Route path="/smtp-test" element={<Index />} />
+            <Route path="/email-validation" element={<Index />} />
+            <Route path="/email-deliverability" element={<Index />} />
+            <Route path="/spf-generator" element={<Index />} />
+            <Route path="/header-analyzer" element={<Index />} />
+            <Route path="/email-migration" element={<Index />} />
+            {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

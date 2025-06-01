@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Network, User, LogIn, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,12 +14,113 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState<ToolCategory>('network');
   const [selectedTool, setSelectedTool] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
+
+  // Map URL paths to tool IDs
+  const urlToToolMap: Record<string, string> = {
+    '/blacklist-check': 'blacklist',
+    '/ptr-lookup': 'ptr',
+    '/arin-lookup': 'arin',
+    '/tcp-port-test': 'tcp',
+    '/ping-test': 'ping',
+    '/traceroute': 'trace',
+    '/geoip-lookup': 'geoip',
+    '/a-record': 'a',
+    '/mx-record': 'mx',
+    '/spf-check': 'spf',
+    '/txt-records': 'txt',
+    '/cname-lookup': 'cname',
+    '/soa-record': 'soa',
+    '/dns-diagnostic': 'dns',
+    '/dnssec-check': 'dnssec',
+    '/https-test': 'https',
+    '/whois-lookup': 'whois',
+    '/dns-propagation': 'propagation',
+    '/smtp-test': 'smtp-test',
+    '/email-validation': 'email-validation',
+    '/email-deliverability': 'deliverability',
+    '/spf-generator': 'spf-generator',
+    '/header-analyzer': 'header-analyzer',
+    '/email-migration': 'email-migration'
+  };
+
+  // Map tool IDs to URL paths
+  const toolToUrlMap: Record<string, string> = {
+    'blacklist': '/blacklist-check',
+    'ptr': '/ptr-lookup',
+    'arin': '/arin-lookup',
+    'tcp': '/tcp-port-test',
+    'ping': '/ping-test',
+    'trace': '/traceroute',
+    'geoip': '/geoip-lookup',
+    'a': '/a-record',
+    'mx': '/mx-record',
+    'spf': '/spf-check',
+    'txt': '/txt-records',
+    'cname': '/cname-lookup',
+    'soa': '/soa-record',
+    'dns': '/dns-diagnostic',
+    'dnssec': '/dnssec-check',
+    'https': '/https-test',
+    'whois': '/whois-lookup',
+    'propagation': '/dns-propagation',
+    'smtp-test': '/smtp-test',
+    'email-validation': '/email-validation',
+    'deliverability': '/email-deliverability',
+    'spf-generator': '/spf-generator',
+    'header-analyzer': '/header-analyzer',
+    'email-migration': '/email-migration'
+  };
+
+  // Map tool IDs to categories
+  const toolCategoryMap: Record<string, ToolCategory> = {
+    'blacklist': 'network',
+    'ptr': 'network',
+    'arin': 'network',
+    'tcp': 'network',
+    'ping': 'network',
+    'trace': 'network',
+    'geoip': 'network',
+    'a': 'dns',
+    'mx': 'dns',
+    'spf': 'dns',
+    'txt': 'dns',
+    'cname': 'dns',
+    'soa': 'dns',
+    'dns': 'dns',
+    'dnssec': 'dns',
+    'https': 'dns',
+    'whois': 'dns',
+    'propagation': 'dns',
+    'smtp-test': 'email',
+    'email-validation': 'email',
+    'deliverability': 'email',
+    'spf-generator': 'email',
+    'header-analyzer': 'email',
+    'email-migration': 'email'
+  };
 
   useEffect(() => {
     // Simulate getting user IP
     setUserIP('192.168.1.1');
   }, []);
+
+  // Handle URL-based tool selection
+  useEffect(() => {
+    const currentPath = location.pathname;
+    const toolId = urlToToolMap[currentPath];
+    
+    if (toolId) {
+      setSelectedTool(toolId);
+      const category = toolCategoryMap[toolId];
+      if (category) {
+        setActiveTab(category);
+      }
+    } else if (currentPath === '/') {
+      setSelectedTool('');
+    }
+  }, [location.pathname]);
 
   const toolsInfo = {
     'blacklist': { name: 'Blacklist Check', inputType: 'IP address', free: true },
@@ -51,6 +153,23 @@ const Index = () => {
     return toolsInfo[toolId as keyof typeof toolsInfo] || { name: 'Unknown Tool', inputType: 'Input', free: true };
   };
 
+  const handleToolSelect = (toolId: string) => {
+    setSelectedTool(toolId);
+    const url = toolToUrlMap[toolId];
+    if (url) {
+      navigate(url);
+    }
+  };
+
+  const handleTabChange = (tab: ToolCategory) => {
+    setActiveTab(tab);
+    // Clear selected tool when changing tabs if not on home
+    if (location.pathname !== '/') {
+      navigate('/');
+      setSelectedTool('');
+    }
+  };
+
   const isDarkMode = activeTab === 'web';
 
   return (
@@ -64,7 +183,7 @@ const Index = () => {
             </div>
             <div>
               <h1 className="text-2xl font-bold text-[#212529]">ToolWeb.io</h1>
-              <p className="text-sm text-[#6c757d]">Network & Email Diagnostic Tools</p>
+              <p className="text-sm text-[#6c757d]">The essential toolkit for domains, IP addresses, and network diagnostics.</p>
             </div>
           </div>
           <div className="flex items-center space-x-3">
@@ -73,7 +192,7 @@ const Index = () => {
                 <Button 
                   variant="outline" 
                   onClick={() => navigate('/dashboard')} 
-                  className="border-[#0d6efd] text-[#212529] hover:bg-[#0d6efd] hover:text-white transition-colors duration-200"
+                  className="bg-white border-[#0d6efd] text-[#0d6efd] hover:bg-[#0d6efd] hover:text-white transition-colors duration-200"
                 >
                   <User className="w-4 h-4 mr-2" />
                   Dashboard
@@ -91,7 +210,7 @@ const Index = () => {
                 <Button 
                   variant="outline" 
                   onClick={() => navigate('/login')} 
-                  className="border-[#0d6efd] text-[#212529] hover:bg-[#0d6efd] hover:text-white transition-colors duration-200"
+                  className="bg-white border-[#0d6efd] text-[#0d6efd] hover:bg-[#0d6efd] hover:text-white transition-colors duration-200"
                 >
                   <LogIn className="w-4 h-4 mr-2" />
                   Login
@@ -142,7 +261,7 @@ const Index = () => {
         {/* Tool Categories Navigation */}
         <TabNavigation 
           activeTab={activeTab} 
-          onTabChange={setActiveTab} 
+          onTabChange={handleTabChange} 
         />
 
         {/* Tool Selection */}
@@ -169,7 +288,7 @@ const Index = () => {
             <ToolSelector 
               activeCategory={activeTab}
               selectedTool={selectedTool}
-              onToolSelect={setSelectedTool}
+              onToolSelect={handleToolSelect}
             />
           </CardContent>
         </Card>
@@ -196,15 +315,15 @@ const Index = () => {
                 </div>
                 <h3 className="text-lg font-bold text-[#212529]">ToolWeb.io</h3>
               </div>
-              <p className="text-[#6c757d] text-sm">Professional network and email diagnostic tools for IT professionals and businesses.</p>
+              <p className="text-[#6c757d] text-sm">The essential toolkit for domains, IP addresses, and network diagnostics.</p>
             </div>
             <div>
               <h4 className="text-[#212529] font-semibold mb-3 text-sm">Popular Tools</h4>
               <ul className="space-y-2 text-sm text-[#6c757d]">
-                <li><button onClick={() => setSelectedTool('blacklist')} className="hover:text-[#0d6efd] transition-colors">Blacklist Check</button></li>
-                <li><button onClick={() => setSelectedTool('mx')} className="hover:text-[#0d6efd] transition-colors">MX Lookup</button></li>
-                <li><button onClick={() => setSelectedTool('ping')} className="hover:text-[#0d6efd] transition-colors">Ping Test</button></li>
-                <li><button onClick={() => setSelectedTool('whois')} className="hover:text-[#0d6efd] transition-colors">WHOIS</button></li>
+                <li><button onClick={() => handleToolSelect('blacklist')} className="hover:text-[#0d6efd] transition-colors">Blacklist Check</button></li>
+                <li><button onClick={() => handleToolSelect('mx')} className="hover:text-[#0d6efd] transition-colors">MX Lookup</button></li>
+                <li><button onClick={() => handleToolSelect('ping')} className="hover:text-[#0d6efd] transition-colors">Ping Test</button></li>
+                <li><button onClick={() => handleToolSelect('whois')} className="hover:text-[#0d6efd] transition-colors">WHOIS</button></li>
               </ul>
             </div>
             <div>
