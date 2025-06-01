@@ -1,13 +1,13 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Download, Search, CheckCircle, XCircle, AlertCircle, RefreshCw } from 'lucide-react';
+import { Download, Search, CheckCircle, XCircle, AlertCircle, RefreshCw, HelpCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import EmailVerificationDownload from './email/EmailVerificationDownload';
 
 interface VerificationRecord {
   id: string;
@@ -91,23 +91,28 @@ const VerifiedEmails: React.FC = () => {
     URL.revokeObjectURL(url);
   };
 
-  const getStatusIcon = (status: string) => {
+  const getStatusIcon = (status: string, confidence?: string) => {
     switch (status) {
       case 'valid': return <CheckCircle className="w-4 h-4 text-green-500" />;
       case 'invalid': return <XCircle className="w-4 h-4 text-red-500" />;
+      case 'unconfirmed': return <HelpCircle className="w-4 h-4 text-orange-500" />;
+      case 'suspicious': return <AlertCircle className="w-4 h-4 text-yellow-500" />;
       case 'catch-all': return <AlertCircle className="w-4 h-4 text-yellow-500" />;
       case 'unreachable': return <XCircle className="w-4 h-4 text-gray-500" />;
       default: return <AlertCircle className="w-4 h-4 text-gray-400" />;
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string, confidence?: string) => {
     switch (status) {
-      case 'valid': return 'bg-green-100 text-green-800 border-green-200';
-      case 'invalid': return 'bg-red-100 text-red-800 border-red-200';
-      case 'catch-all': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'unreachable': return 'bg-gray-100 text-gray-800 border-gray-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+      case 'valid': 
+        return confidence === 'high' ? 'bg-green-100 text-green-800' : 'bg-green-50 text-green-600';
+      case 'invalid': return 'bg-red-100 text-red-800';
+      case 'unconfirmed': return 'bg-orange-100 text-orange-800';
+      case 'suspicious': return 'bg-yellow-100 text-yellow-800';
+      case 'catch-all': return 'bg-yellow-100 text-yellow-800';
+      case 'unreachable': return 'bg-gray-100 text-gray-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -121,6 +126,8 @@ const VerifiedEmails: React.FC = () => {
       total: verifications.length,
       valid: counts.valid || 0,
       invalid: counts.invalid || 0,
+      unconfirmed: counts.unconfirmed || 0,
+      suspicious: counts.suspicious || 0,
       'catch-all': counts['catch-all'] || 0,
       unreachable: counts.unreachable || 0
     };
@@ -130,11 +137,11 @@ const VerifiedEmails: React.FC = () => {
 
   if (isLoading) {
     return (
-      <Card>
+      <Card className="bg-gray-800/50 border-gray-700">
         <CardContent className="flex items-center justify-center py-12">
           <div className="text-center">
             <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-4 text-gray-400" />
-            <p className="text-gray-500">Loading verification results...</p>
+            <p className="text-gray-400">Loading verification results...</p>
           </div>
         </CardContent>
       </Card>
@@ -144,49 +151,52 @@ const VerifiedEmails: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Statistics Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <Card>
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+        <Card className="bg-gray-800/50 border-gray-700">
           <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-gray-900">{statusCounts.total}</div>
-            <div className="text-sm text-gray-600">Total</div>
+            <div className="text-2xl font-bold text-white">{statusCounts.total}</div>
+            <div className="text-sm text-gray-400">Total</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-gray-800/50 border-gray-700">
           <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-green-600">{statusCounts.valid}</div>
-            <div className="text-sm text-gray-600">Valid</div>
+            <div className="text-2xl font-bold text-green-400">{statusCounts.valid}</div>
+            <div className="text-sm text-gray-400">Valid</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-gray-800/50 border-gray-700">
           <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-red-600">{statusCounts.invalid}</div>
-            <div className="text-sm text-gray-600">Invalid</div>
+            <div className="text-2xl font-bold text-red-400">{statusCounts.invalid}</div>
+            <div className="text-sm text-gray-400">Invalid</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-gray-800/50 border-gray-700">
           <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-yellow-600">{statusCounts['catch-all']}</div>
-            <div className="text-sm text-gray-600">Catch-all</div>
+            <div className="text-2xl font-bold text-orange-400">{statusCounts.unconfirmed}</div>
+            <div className="text-sm text-gray-400">Unconfirmed</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-gray-800/50 border-gray-700">
           <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-gray-600">{statusCounts.unreachable}</div>
-            <div className="text-sm text-gray-600">Unreachable</div>
+            <div className="text-2xl font-bold text-yellow-400">{statusCounts['catch-all']}</div>
+            <div className="text-sm text-gray-400">Catch-all</div>
+          </CardContent>
+        </Card>
+        <Card className="bg-gray-800/50 border-gray-700">
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold text-gray-400">{statusCounts.unreachable}</div>
+            <div className="text-sm text-gray-400">Unreachable</div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Filters and Export */}
-      <Card>
+      {/* Download Component */}
+      <EmailVerificationDownload verifications={verifications} />
+
+      {/* Verification History Table */}
+      <Card className="bg-gray-800/50 border-gray-700">
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Verified Emails</CardTitle>
-            <Button onClick={exportResults} disabled={!filteredVerifications.length}>
-              <Download className="w-4 h-4 mr-2" />
-              Export CSV
-            </Button>
-          </div>
+          <CardTitle className="text-white">Email Verification History</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex gap-4 mb-6">
@@ -197,18 +207,20 @@ const VerifiedEmails: React.FC = () => {
                   placeholder="Search emails..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 bg-gray-700 border-gray-600 text-white"
                 />
               </div>
             </div>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md"
+              className="px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
             >
               <option value="all">All Status</option>
               <option value="valid">Valid</option>
               <option value="invalid">Invalid</option>
+              <option value="unconfirmed">Unconfirmed</option>
+              <option value="suspicious">Suspicious</option>
               <option value="catch-all">Catch-all</option>
               <option value="unreachable">Unreachable</option>
             </select>
@@ -216,7 +228,7 @@ const VerifiedEmails: React.FC = () => {
 
           {filteredVerifications.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500">
+              <p className="text-gray-400">
                 {verifications.length === 0 
                   ? "No email verifications found. Start verifying emails to see results here."
                   : "No results match your search criteria."
@@ -224,50 +236,50 @@ const VerifiedEmails: React.FC = () => {
               </p>
             </div>
           ) : (
-            <div className="border rounded-lg overflow-hidden">
+            <div className="border border-gray-700 rounded-lg overflow-hidden">
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead>Email Address</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>SMTP Server</TableHead>
-                    <TableHead>Response</TableHead>
-                    <TableHead>Date</TableHead>
+                  <TableRow className="border-gray-700">
+                    <TableHead className="text-gray-300">Email Address</TableHead>
+                    <TableHead className="text-gray-300">Verification Result</TableHead>
+                    <TableHead className="text-gray-300">Confidence</TableHead>
+                    <TableHead className="text-gray-300">Provider Info</TableHead>
+                    <TableHead className="text-gray-300">Timestamp</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredVerifications.map((verification) => (
-                    <TableRow key={verification.id}>
-                      <TableCell className="font-mono text-sm">
+                    <TableRow key={verification.id} className="border-gray-700">
+                      <TableCell className="font-mono text-sm text-gray-300">
                         {verification.email_address}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          {getStatusIcon(verification.status)}
-                          <Badge className={getStatusColor(verification.status)}>
+                          {getStatusIcon(verification.status, verification.verification_details?.confidence)}
+                          <Badge className={getStatusColor(verification.status, verification.verification_details?.confidence)}>
                             {verification.status}
                           </Badge>
                         </div>
                       </TableCell>
-                      <TableCell className="text-sm text-gray-600">
-                        {verification.smtp_server || '-'}
+                      <TableCell>
+                        {verification.verification_details?.confidence && (
+                          <Badge variant="outline" className="text-gray-400 border-gray-600">
+                            {verification.verification_details.confidence}
+                          </Badge>
+                        )}
                       </TableCell>
-                      <TableCell className="text-sm">
-                        {verification.smtp_response_code && (
+                      <TableCell className="text-sm text-gray-400">
+                        {verification.verification_details?.provider && (
                           <div>
-                            <span className="font-mono text-xs bg-gray-100 px-1 rounded">
-                              {verification.smtp_response_code}
-                            </span>
-                            {verification.smtp_response_message && (
-                              <div className="text-xs text-gray-600 mt-1 max-w-xs truncate">
-                                {verification.smtp_response_message}
-                              </div>
+                            <div className="font-medium">{verification.verification_details.provider}</div>
+                            {verification.verification_attempts && (
+                              <div className="text-xs">Attempts: {verification.verification_attempts}</div>
                             )}
                           </div>
                         )}
                       </TableCell>
-                      <TableCell className="text-sm text-gray-600">
-                        {new Date(verification.created_at).toLocaleDateString()}
+                      <TableCell className="text-sm text-gray-400">
+                        {new Date(verification.created_at).toLocaleDateString()} {new Date(verification.created_at).toLocaleTimeString()}
                       </TableCell>
                     </TableRow>
                   ))}

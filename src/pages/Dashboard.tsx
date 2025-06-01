@@ -1,12 +1,8 @@
-
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
-import WelcomeSection from '@/components/dashboard/WelcomeSection';
-import RecentActivity from '@/components/dashboard/RecentActivity';
-import PlanCard from '@/components/dashboard/PlanCard';
-import QuickTools from '@/components/dashboard/QuickTools';
+import DashboardTabs from '@/components/DashboardTabs';
 
 const Dashboard = () => {
   const { user, logout, loading } = useAuth();
@@ -46,18 +42,13 @@ const Dashboard = () => {
       <DashboardHeader onLogout={handleLogout} />
 
       <div className="container mx-auto px-4 py-8">
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            <WelcomeSection userEmail={user.email} />
-            <RecentActivity activities={recentActivity} />
+        <div className="max-w-6xl mx-auto">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-white mb-2">Dashboard</h1>
+            <p className="text-gray-400">Welcome back, {user?.email}</p>
           </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            <PlanCard user={user} />
-            <QuickTools />
-          </div>
+          
+          <DashboardTabs />
         </div>
       </div>
     </div>
