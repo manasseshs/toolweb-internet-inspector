@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Network, User, LogIn, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,45 +7,18 @@ import { useAuth } from '@/contexts/AuthContext';
 import TabNavigation, { ToolCategory } from '@/components/TabNavigation';
 import ToolSelector from '@/components/ToolSelector';
 import ToolExecutor from '@/components/ToolExecutor';
-import GlobalFooter from '@/components/GlobalFooter';
-import { getToolIdFromPath, getPathFromToolId } from '@/utils/toolRoutes';
 
 const Index = () => {
   const [userIP, setUserIP] = useState('192.168.1.1');
   const [activeTab, setActiveTab] = useState<ToolCategory>('network');
   const [selectedTool, setSelectedTool] = useState('');
   const navigate = useNavigate();
-  const location = useLocation();
   const { user } = useAuth();
 
   useEffect(() => {
     // Simulate getting user IP
     setUserIP('192.168.1.1');
   }, []);
-
-  // Check if current path corresponds to a tool
-  useEffect(() => {
-    const toolId = getToolIdFromPath(location.pathname);
-    if (toolId && toolId !== selectedTool) {
-      setSelectedTool(toolId);
-      // Set appropriate tab based on tool
-      const toolCategories = {
-        'blacklist': 'network', 'ptr': 'network', 'arin': 'network', 'tcp': 'network', 'ping': 'network', 'trace': 'network', 'geoip': 'network',
-        'a': 'dns', 'mx': 'dns', 'spf': 'dns', 'txt': 'dns', 'cname': 'dns', 'soa': 'dns', 'dns': 'dns', 'dnssec': 'dns', 'https': 'dns', 'whois': 'dns', 'propagation': 'dns',
-        'smtp-test': 'email', 'email-validation': 'email', 'deliverability': 'email', 'spf-generator': 'email', 'header-analyzer': 'email', 'email-migration': 'email'
-      };
-      const category = toolCategories[toolId as keyof typeof toolCategories] as ToolCategory;
-      if (category) {
-        setActiveTab(category);
-      }
-    }
-  }, [location.pathname, selectedTool]);
-
-  const handleToolSelect = (toolId: string) => {
-    setSelectedTool(toolId);
-    const path = getPathFromToolId(toolId);
-    navigate(path, { replace: true });
-  };
 
   const toolsInfo = {
     'blacklist': { name: 'Blacklist Check', inputType: 'IP address', free: true },
@@ -92,7 +64,7 @@ const Index = () => {
             </div>
             <div>
               <h1 className="text-2xl font-bold text-[#212529]">ToolWeb.io</h1>
-              <p className="text-sm text-[#6c757d]">Advanced Web Diagnostics & Infrastructure Tools</p>
+              <p className="text-sm text-[#6c757d]">Network & Email Diagnostic Tools</p>
             </div>
           </div>
           <div className="flex items-center space-x-3">
@@ -101,7 +73,7 @@ const Index = () => {
                 <Button 
                   variant="outline" 
                   onClick={() => navigate('/dashboard')} 
-                  className="bg-[#0d6efd] hover:bg-[#0b5ed7] text-white border-[#0d6efd] hover:border-[#0b5ed7] shadow-sm transition-colors duration-200"
+                  className="border-[#0d6efd] text-[#212529] hover:bg-[#0d6efd] hover:text-white transition-colors duration-200"
                 >
                   <User className="w-4 h-4 mr-2" />
                   Dashboard
@@ -119,7 +91,7 @@ const Index = () => {
                 <Button 
                   variant="outline" 
                   onClick={() => navigate('/login')} 
-                  className="bg-[#0d6efd] hover:bg-[#0b5ed7] text-white border-[#0d6efd] hover:border-[#0b5ed7] shadow-sm transition-colors duration-200"
+                  className="border-[#0d6efd] text-[#212529] hover:bg-[#0d6efd] hover:text-white transition-colors duration-200"
                 >
                   <LogIn className="w-4 h-4 mr-2" />
                   Login
@@ -197,7 +169,7 @@ const Index = () => {
             <ToolSelector 
               activeCategory={activeTab}
               selectedTool={selectedTool}
-              onToolSelect={handleToolSelect}
+              onToolSelect={setSelectedTool}
             />
           </CardContent>
         </Card>
@@ -213,8 +185,52 @@ const Index = () => {
         </div>
       </main>
 
-      {/* Global Footer */}
-      <GlobalFooter />
+      {/* Footer */}
+      <footer className="bg-white border-t border-[#dee2e6] mt-8">
+        <div className="container mx-auto px-4 py-8">
+          <div className="grid md:grid-cols-4 gap-6">
+            <div>
+              <div className="flex items-center space-x-3 mb-3">
+                <div className="w-8 h-8 bg-gradient-to-r from-[#0d6efd] to-[#6f42c1] rounded-lg flex items-center justify-center">
+                  <Network className="w-5 h-5 text-white" />
+                </div>
+                <h3 className="text-lg font-bold text-[#212529]">ToolWeb.io</h3>
+              </div>
+              <p className="text-[#6c757d] text-sm">Professional network and email diagnostic tools for IT professionals and businesses.</p>
+            </div>
+            <div>
+              <h4 className="text-[#212529] font-semibold mb-3 text-sm">Popular Tools</h4>
+              <ul className="space-y-2 text-sm text-[#6c757d]">
+                <li><button onClick={() => setSelectedTool('blacklist')} className="hover:text-[#0d6efd] transition-colors">Blacklist Check</button></li>
+                <li><button onClick={() => setSelectedTool('mx')} className="hover:text-[#0d6efd] transition-colors">MX Lookup</button></li>
+                <li><button onClick={() => setSelectedTool('ping')} className="hover:text-[#0d6efd] transition-colors">Ping Test</button></li>
+                <li><button onClick={() => setSelectedTool('whois')} className="hover:text-[#0d6efd] transition-colors">WHOIS</button></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-[#212529] font-semibold mb-3 text-sm">Account</h4>
+              <ul className="space-y-2 text-sm text-[#6c757d]">
+                <li><a href="/login" className="hover:text-[#0d6efd] transition-colors">Login</a></li>
+                <li><a href="/register" className="hover:text-[#0d6efd] transition-colors">Register</a></li>
+                <li><a href="/pricing" className="hover:text-[#0d6efd] transition-colors">Pricing</a></li>
+                <li><a href="/dashboard" className="hover:text-[#0d6efd] transition-colors">Dashboard</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-[#212529] font-semibold mb-3 text-sm">Support</h4>
+              <ul className="space-y-2 text-sm text-[#6c757d]">
+                <li><a href="/contact" className="hover:text-[#0d6efd] transition-colors">Contact Us</a></li>
+                <li><a href="/help" className="hover:text-[#0d6efd] transition-colors">Help Center</a></li>
+                <li><a href="/privacy" className="hover:text-[#0d6efd] transition-colors">Privacy Policy</a></li>
+                <li><a href="/terms" className="hover:text-[#0d6efd] transition-colors">Terms of Use</a></li>
+              </ul>
+            </div>
+          </div>
+          <div className="border-t border-[#dee2e6] mt-6 pt-6 text-center text-[#6c757d] text-sm">
+            <p>&copy; 2024 ToolWeb.io. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };

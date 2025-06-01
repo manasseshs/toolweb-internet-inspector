@@ -1,29 +1,22 @@
-
 import React, { useState, useEffect } from 'react';
-import { useParams, useSearchParams, Link, useLocation } from 'react-router-dom';
+import { useParams, useSearchParams, Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import ToolHeader from '@/components/ToolHeader';
 import ToolInput from '@/components/ToolInput';
 import ToolResults from '@/components/ToolResults';
-import GlobalFooter from '@/components/GlobalFooter';
 import { generateToolResponse } from '@/components/ToolSimulator';
 import { useToast } from '@/hooks/use-toast';
-import { getToolIdFromPath } from '@/utils/toolRoutes';
 
 const Tools = () => {
-  const { toolId: paramToolId } = useParams();
-  const location = useLocation();
+  const { toolId } = useParams();
   const [searchParams] = useSearchParams();
   const [input, setInput] = useState(searchParams.get('input') || '');
   const [result, setResult] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
-
-  // Get tool ID from URL path or params
-  const toolId = getToolIdFromPath(location.pathname) || paramToolId;
 
   const toolsInfo = {
     'blacklist': { name: 'Blacklist Check', description: 'Check if IP is on spam blacklists', inputType: 'IP address', free: true },
@@ -103,77 +96,70 @@ const Tools = () => {
 
   if (!tool) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex flex-col">
-        <div className="flex-1 flex items-center justify-center">
-          <Card className="bg-gray-800/50 border-gray-700 max-w-md">
-            <CardContent className="p-8 text-center">
-              <h2 className="text-2xl font-bold text-white mb-4">Tool Not Found</h2>
-              <p className="text-gray-400 mb-6">The requested tool does not exist.</p>
-              <Link to="/" className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-4 py-2 rounded">
-                Back to Home
-              </Link>
-            </CardContent>
-          </Card>
-        </div>
-        <GlobalFooter />
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center">
+        <Card className="bg-gray-800/50 border-gray-700 max-w-md">
+          <CardContent className="p-8 text-center">
+            <h2 className="text-2xl font-bold text-white mb-4">Tool Not Found</h2>
+            <p className="text-gray-400 mb-6">The requested tool does not exist.</p>
+            <Link to="/" className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-4 py-2 rounded">
+              Back to Home
+            </Link>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
       <ToolHeader toolName={tool.name} />
 
-      <div className="flex-1">
-        <div className="container mx-auto px-4 py-8">
-          <div className="max-w-4xl mx-auto">
-            {/* Tool Info */}
-            <div className="mb-8">
-              <div className="flex items-center gap-3 mb-4">
-                <h1 className="text-3xl font-bold text-white">{tool.name}</h1>
-                {!tool.free && <Badge variant="secondary">Pro</Badge>}
-              </div>
-              <p className="text-gray-400 text-lg">{tool.description}</p>
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto">
+          {/* Tool Info */}
+          <div className="mb-8">
+            <div className="flex items-center gap-3 mb-4">
+              <h1 className="text-3xl font-bold text-white">{tool.name}</h1>
+              {!tool.free && <Badge variant="secondary">Pro</Badge>}
             </div>
-
-            {/* Tool Input */}
-            <ToolInput
-              toolName={tool.name}
-              inputType={tool.inputType}
-              isFree={tool.free}
-              input={input}
-              onInputChange={setInput}
-              onExecute={handleExecute}
-              isLoading={isLoading}
-              canUseTool={canUseTool()}
-            />
-
-            {/* Results */}
-            {(result || isLoading) && (
-              <ToolResults
-                result={result}
-                input={input}
-                toolId={toolId!}
-                isLegacyTool={true}
-              />
-            )}
-
-            {/* Loading State */}
-            {isLoading && !result && (
-              <Card className="bg-gray-800/50 border-gray-700">
-                <CardContent className="flex items-center justify-center py-12">
-                  <div className="text-center">
-                    <div className="w-8 h-8 border-4 border-blue-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                    <p className="text-gray-400">Analyzing {input}...</p>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+            <p className="text-gray-400 text-lg">{tool.description}</p>
           </div>
+
+          {/* Tool Input */}
+          <ToolInput
+            toolName={tool.name}
+            inputType={tool.inputType}
+            isFree={tool.free}
+            input={input}
+            onInputChange={setInput}
+            onExecute={handleExecute}
+            isLoading={isLoading}
+            canUseTool={canUseTool()}
+          />
+
+          {/* Results */}
+          {(result || isLoading) && (
+            <ToolResults
+              result={result}
+              input={input}
+              toolId={toolId!}
+              isLegacyTool={true}
+            />
+          )}
+
+          {/* Loading State */}
+          {isLoading && !result && (
+            <Card className="bg-gray-800/50 border-gray-700">
+              <CardContent className="flex items-center justify-center py-12">
+                <div className="text-center">
+                  <div className="w-8 h-8 border-4 border-blue-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                  <p className="text-gray-400">Analyzing {input}...</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
-
-      <GlobalFooter />
     </div>
   );
 };
