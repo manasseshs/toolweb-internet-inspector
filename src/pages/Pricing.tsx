@@ -44,8 +44,8 @@ const Pricing = () => {
       icon: Zap,
       price: { monthly: 9, annual: 90 },
       priceId: { 
-        monthly: 'price_1QhxYYCn5VlJ2hQlqLGXCgAB', // Replace with your actual Stripe price ID
-        annual: 'price_1QhxYYCn5VlJ2hQlqLGXCgAC'   // Replace with your actual Stripe price ID
+        monthly: 'price_1RV28rRvd8wXgl1xGe5tGa6u',
+        annual: 'price_1RV2B0Rvd8wXgl1xBjHIT3RL'
       },
       description: 'For professionals and teams',
       popular: true,
@@ -70,8 +70,8 @@ const Pricing = () => {
       icon: Crown,
       price: { monthly: 19, annual: 190 },
       priceId: { 
-        monthly: 'price_1QhxYYCn5VlJ2hQlqLGXCgAD', // Replace with your actual Stripe price ID
-        annual: 'price_1QhxYYCn5VlJ2hQlqLGXCgAE'   // Replace with your actual Stripe price ID
+        monthly: 'price_1RV29bRvd8wXgl1x8nO3IvV7',
+        annual: 'price_1RV2CBRvd8wXgl1x9OvEK4ZV'
       },
       description: 'For large organizations',
       features: [
@@ -383,6 +383,92 @@ const Pricing = () => {
       </div>
     </div>
   );
+};
+
+const handleSubscribe = async (planId: string, price: number) => {
+  if (!user && planId !== 'free') {
+    navigate('/login');
+    return;
+  }
+
+  if (planId === 'free') {
+    toast({
+      title: "Already on free plan",
+      description: "You're currently using the free plan.",
+    });
+    return;
+  }
+
+  if (!session) {
+    toast({
+      title: "Authentication required",
+      description: "Please log in to subscribe to a plan.",
+      variant: "destructive",
+    });
+    navigate('/login');
+    return;
+  }
+
+  const plan = plans.find(p => p.id === planId);
+  if (!plan?.priceId) {
+    toast({
+      title: "Error",
+      description: "Invalid plan selected.",
+      variant: "destructive",
+    });
+    return;
+  }
+
+  const priceId = isAnnual ? plan.priceId.annual : plan.priceId.monthly;
+  if (!priceId) {
+    toast({
+      title: "Error",
+      description: "Price ID not configured for this plan.",
+      variant: "destructive",
+    });
+    return;
+  }
+
+  setLoading(planId);
+
+  try {
+    const { data, error } = await supabase.functions.invoke('create-checkout', {
+      body: {
+        priceId,
+        planName: plan.name
+      },
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+      },
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    if (data?.url) {
+      // Open Stripe checkout in a new tab
+      window.open(data.url, '_blank');
+      
+      toast({
+        title: "Redirecting to checkout",
+        description: "Opening Stripe checkout in a new tab...",
+      });
+    }
+  } catch (error: any) {
+    console.error('Subscription error:', error);
+    toast({
+      title: "Error",
+      description: error.message || "Failed to create checkout session",
+      variant: "destructive",
+    });
+  } finally {
+    setLoading(null);
+  }
+};
+
+const getCurrentPlan = () => {
+  return user?.subscription_tier || user?.plan || 'free';
 };
 
 export default Pricing;
