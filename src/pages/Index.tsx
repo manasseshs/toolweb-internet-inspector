@@ -1,14 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Network, User, LogIn, Settings } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useAuth } from '@/contexts/AuthContext';
-import TabNavigation, { ToolCategory } from '@/components/TabNavigation';
-import ToolSelector from '@/components/ToolSelector';
+import { ToolCategory } from '@/components/TabNavigation';
 import ToolExecutor from '@/components/ToolExecutor';
-import GlobalFooter from '@/components/GlobalFooter';
+import HomeLayout from '@/components/home/HomeLayout';
+import HeroSection from '@/components/home/HeroSection';
+import ToolCategoriesSection from '@/components/home/ToolCategoriesSection';
 import { getToolIdFromPath, getPathFromToolId } from '@/utils/toolRoutes';
 
 const Index = () => {
@@ -17,7 +14,6 @@ const Index = () => {
   const [selectedTool, setSelectedTool] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuth();
 
   useEffect(() => {
     // Simulate getting user IP
@@ -79,143 +75,27 @@ const Index = () => {
     return toolsInfo[toolId as keyof typeof toolsInfo] || { name: 'Unknown Tool', inputType: 'Input', free: true };
   };
 
-  const isDarkMode = activeTab === 'web';
-
   return (
-    <div className="min-h-screen bg-[#f8f9fa]">
-      {/* Header */}
-      <header className="bg-white border-b border-[#dee2e6] shadow-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-[#0d6efd] to-[#6f42c1] rounded-xl flex items-center justify-center shadow-sm">
-              <Network className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-[#212529]">ToolWeb.io</h1>
-              <p className="text-sm text-[#6c757d]">Advanced Web Diagnostics & Infrastructure Tools</p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-3">
-            {user ? (
-              <>
-                <Button 
-                  variant="outline" 
-                  onClick={() => navigate('/dashboard')} 
-                  className="bg-[#0d6efd] hover:bg-[#0b5ed7] text-white border-[#0d6efd] hover:border-[#0b5ed7] shadow-sm transition-colors duration-200"
-                >
-                  <User className="w-4 h-4 mr-2" />
-                  Dashboard
-                </Button>
-                <Button 
-                  onClick={() => navigate('/pricing')} 
-                  className="bg-[#0d6efd] hover:bg-[#0b5ed7] text-white shadow-sm"
-                >
-                  <Settings className="w-4 h-4 mr-2" />
-                  Upgrade
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button 
-                  variant="outline" 
-                  onClick={() => navigate('/login')} 
-                  className="bg-[#0d6efd] hover:bg-[#0b5ed7] text-white border-[#0d6efd] hover:border-[#0b5ed7] shadow-sm transition-colors duration-200"
-                >
-                  <LogIn className="w-4 h-4 mr-2" />
-                  Login
-                </Button>
-                <Button 
-                  onClick={() => navigate('/pricing')} 
-                  className="bg-[#0d6efd] hover:bg-[#0b5ed7] text-white shadow-sm"
-                >
-                  Upgrade
-                </Button>
-              </>
-            )}
-          </div>
-        </div>
-      </header>
+    <HomeLayout>
+      <HeroSection userIP={userIP} />
+      
+      <ToolCategoriesSection 
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        selectedTool={selectedTool}
+        onToolSelect={handleToolSelect}
+      />
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-4">
-        {/* Hero Section */}
-        <div className="text-center mb-4">
-          <div className="mb-4">
-            {/* Robot Mascot */}
-            <div className="w-16 h-16 bg-gradient-to-r from-[#0d6efd] to-[#6f42c1] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-              <Network className="w-8 h-8 text-white" />
-            </div>
-            
-            <h2 className="text-4xl md:text-5xl font-bold text-[#212529] mb-3 leading-tight">
-              Professional Network
-              <span className="block bg-gradient-to-r from-[#0d6efd] to-[#6f42c1] bg-clip-text text-transparent">
-                Diagnostic Tools
-              </span>
-            </h2>
-            
-            <p className="text-lg text-[#6c757d] mb-4 max-w-2xl mx-auto">
-              Analyze IP addresses, domains, and email systems with precision and ease
-            </p>
-            
-            <div className="inline-flex items-center bg-white rounded-full px-5 py-2 border border-[#dee2e6] shadow-sm">
-              <span className="text-[#6c757d] mr-2">Hello</span>
-              <span className="text-[#0d6efd] font-mono font-semibold bg-[#f8f9fa] px-3 py-1 rounded-full text-sm border border-[#dee2e6]">
-                {userIP}
-              </span>
-              <span className="text-[#6c757d] ml-2">, what can I help you with today?</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Tool Categories Navigation */}
-        <TabNavigation 
-          activeTab={activeTab} 
-          onTabChange={setActiveTab} 
+      {/* Tool Executor */}
+      <div className="mb-4">
+        <ToolExecutor 
+          selectedTool={selectedTool}
+          toolName={getToolInfo(selectedTool).name}
+          inputType={getToolInfo(selectedTool).inputType}
+          isFree={getToolInfo(selectedTool).free}
         />
-
-        {/* Tool Selection */}
-        <Card className={`mt-4 mb-4 shadow-sm transition-colors duration-200 ${
-          isDarkMode 
-            ? 'border-[#475569] bg-[#1e293b]' 
-            : 'border-[#dee2e6] bg-white'
-        }`}>
-          <CardHeader className={`rounded-t-lg border-b transition-colors duration-200 ${
-            isDarkMode 
-              ? 'bg-[#334155] border-[#475569]' 
-              : 'bg-[#f8f9fa] border-[#dee2e6]'
-          }`}>
-            <CardTitle className={`text-xl ${
-              isDarkMode ? 'text-[#f1f5f9]' : 'text-[#212529]'
-            }`}>
-              Select Tool
-            </CardTitle>
-            <CardDescription className={isDarkMode ? 'text-[#94a3b8]' : 'text-[#6c757d]'}>
-              Choose from our comprehensive suite of network and email analysis tools
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-4">
-            <ToolSelector 
-              activeCategory={activeTab}
-              selectedTool={selectedTool}
-              onToolSelect={handleToolSelect}
-            />
-          </CardContent>
-        </Card>
-
-        {/* Tool Executor */}
-        <div className="mb-4">
-          <ToolExecutor 
-            selectedTool={selectedTool}
-            toolName={getToolInfo(selectedTool).name}
-            inputType={getToolInfo(selectedTool).inputType}
-            isFree={getToolInfo(selectedTool).free}
-          />
-        </div>
-      </main>
-
-      {/* Global Footer */}
-      <GlobalFooter />
-    </div>
+      </div>
+    </HomeLayout>
   );
 };
 
