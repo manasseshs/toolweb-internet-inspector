@@ -56,6 +56,55 @@ const UserManagement = () => {
     }
   };
 
+  const syncMissingProfiles = async () => {
+    try {
+      console.log('Checking for users without profiles...');
+      toast({
+        title: "Syncing",
+        description: "Checking for missing user profiles...",
+      });
+
+      // This will trigger the edge function to check and create missing profiles
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error('No active session');
+      }
+
+      // Call a sync function to fix missing profiles
+      const response = await fetch(
+        `https://dfongkhekhdfkfhgsqke.supabase.co/functions/v1/admin-create-user`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'sync_missing_profiles'
+          }),
+        }
+      );
+
+      const result = await response.json();
+      
+      if (response.ok) {
+        toast({
+          title: "Sync Complete",
+          description: "User profiles have been synchronized",
+        });
+        fetchProfiles(); // Refresh the list
+      }
+    } catch (error: any) {
+      console.error('Error syncing profiles:', error);
+      toast({
+        title: "Sync Error", 
+        description: "Failed to sync user profiles",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleUserAdded = async () => {
     console.log('New user added, refreshing profiles list...');
     toast({
@@ -63,10 +112,10 @@ const UserManagement = () => {
       description: "Refreshing user list...",
     });
     
-    // Refresh the profiles list with a slight delay to ensure the profile is created
+    // Refresh the profiles list with a longer delay to ensure the profile is created
     setTimeout(() => {
       fetchProfiles();
-    }, 1000);
+    }, 2000);
   };
 
   const updateUserStatus = async (userId: string, status: 'active' | 'disabled') => {
@@ -150,7 +199,15 @@ const UserManagement = () => {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <UserStats userCount={profiles.length} />
-        <AddUserDialog onUserAdded={handleUserAdded} />
+        <div className="flex gap-2">
+          <button
+            onClick={syncMissingProfiles}
+            className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-md text-sm"
+          >
+            Sync Missing Profiles
+          </button>
+          <AddUserDialog onUserAdded={handleUserAdded} />
+        </div>
       </div>
 
       <UserTable

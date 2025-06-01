@@ -13,6 +13,16 @@ const logStep = (step: string, details?: any) => {
   console.log(`[CREATE-CHECKOUT] ${step}${detailsStr}`);
 };
 
+// Valid price IDs mapping
+const VALID_PRICE_IDS = {
+  // Monthly plans
+  'pro_monthly': 'price_1RV25WRvd8wXgl1xWVTglsKq',
+  'enterprise_monthly': 'price_1RV26RRvd8wXgl1x7DtR8tCU',
+  // Add yearly plans here when available
+  // 'pro_yearly': 'price_xxxxx',
+  // 'enterprise_yearly': 'price_xxxxx'
+};
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -58,6 +68,23 @@ serve(async (req) => {
     if (!priceId || !planName) {
       return new Response(
         JSON.stringify({ error: 'Price ID and plan name are required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Validate price ID against our known valid prices
+    const validPriceIds = Object.values(VALID_PRICE_IDS);
+    if (!validPriceIds.includes(priceId)) {
+      logStep("ERROR: Price ID not in valid list", { 
+        priceId, 
+        validPriceIds,
+        knownPlans: Object.keys(VALID_PRICE_IDS)
+      });
+      return new Response(
+        JSON.stringify({ 
+          error: `Invalid price ID: ${priceId}. Valid price IDs are: ${validPriceIds.join(', ')}`,
+          validPlans: Object.keys(VALID_PRICE_IDS)
+        }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
