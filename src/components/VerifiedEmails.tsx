@@ -17,6 +17,7 @@ interface VerificationRecord {
   smtp_response_code?: string;
   smtp_response_message?: string;
   verification_details?: any;
+  verification_attempts?: number;
   created_at: string;
 }
 

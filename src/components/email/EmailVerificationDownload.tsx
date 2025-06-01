@@ -239,7 +239,12 @@ const EmailVerificationDownload: React.FC<EmailVerificationDownloadProps> = ({ v
             <Checkbox 
               id="include-result" 
               checked={includeResult}
-              onCheckedChange={setIncludeResult}
+              onCheckedChange={(checked) => {
+                // Handle the CheckedState type properly
+                if (typeof checked === 'boolean') {
+                  setIncludeResult(checked);
+                }
+              }}
             />
             <label htmlFor="include-result" className="text-sm text-gray-300">
               Include verification result
