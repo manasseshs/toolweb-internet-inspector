@@ -3,14 +3,15 @@ import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Play, AlertCircle, RefreshCw, Upload } from 'lucide-react';
+import { Play, AlertCircle, RefreshCw } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import CaptchaComponent from './CaptchaComponent';
 import ExecutionProgress from './ExecutionProgress';
 import ToolResults from './ToolResults';
+import EmailVerification from './EmailVerification';
+import EmailMigration from './EmailMigration';
 import { generateToolResponse } from './ToolSimulator';
 
 interface ToolExecutorProps {
@@ -22,8 +23,6 @@ interface ToolExecutorProps {
 
 const ToolExecutor: React.FC<ToolExecutorProps> = ({ selectedTool, toolName, inputType, isFree }) => {
   const [input, setInput] = useState('');
-  const [emailList, setEmailList] = useState('');
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [result, setResult] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -34,8 +33,17 @@ const ToolExecutor: React.FC<ToolExecutorProps> = ({ selectedTool, toolName, inp
   const { user } = useAuth();
   const { toast } = useToast();
 
+  // Special tools that have their own components
+  if (selectedTool === 'email-validation') {
+    return <EmailVerification />;
+  }
+  
+  if (selectedTool === 'email-migration') {
+    return <EmailMigration />;
+  }
+
   const requiresLogin = () => {
-    return ['email-validation', 'email-migration'].includes(selectedTool);
+    return false; // Removed login requirement for most tools
   };
 
   const canUseTool = () => {
@@ -48,55 +56,16 @@ const ToolExecutor: React.FC<ToolExecutorProps> = ({ selectedTool, toolName, inp
     return isFree && !user;
   };
 
-  const isEmailValidationTool = selectedTool === 'email-validation';
-  const isPaidUser = user && (user.plan === 'pro' || user.plan === 'enterprise');
-
   const addLog = (message: string) => {
     const timestamp = new Date().toLocaleTimeString();
     setLogs(prev => [...prev, `[${timestamp}] ${message}`]);
   };
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file && (file.type === 'text/plain' || file.type === 'text/csv')) {
-      setUploadedFile(file);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const content = e.target?.result as string;
-        const emails = content.split(/\r?\n/).filter(email => email.trim());
-        setEmailList(emails.join('\n'));
-      };
-      reader.readAsText(file);
-    } else {
-      toast({
-        title: "Invalid file type",
-        description: "Please upload a TXT or CSV file.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const validateEmailInput = () => {
-    if (isEmailValidationTool) {
-      const emails = emailList.split('\n').filter(email => email.trim());
-      if (!isPaidUser && emails.length > 10) {
-        toast({
-          title: "Limit exceeded",
-          description: "Free users can validate up to 10 emails at once.",
-          variant: "destructive",
-        });
-        return false;
-      }
-      return emails.length > 0;
-    }
-    return input.trim() !== '';
-  };
-
   const handleExecute = async () => {
-    if (!validateEmailInput()) {
+    if (!input.trim()) {
       toast({
         title: "Input required",
-        description: isEmailValidationTool ? "Please enter at least one email address." : `Please enter a ${inputType}.`,
+        description: `Please enter a ${inputType}.`,
         variant: "destructive",
       });
       return;
@@ -138,8 +107,7 @@ const ToolExecutor: React.FC<ToolExecutorProps> = ({ selectedTool, toolName, inp
     setExecutionId(newExecutionId);
 
     try {
-      const analysisInput = isEmailValidationTool ? emailList : input;
-      addLog(`Starting ${toolName} analysis for: ${analysisInput.split('\n')[0]}${isEmailValidationTool && emailList.split('\n').length > 1 ? ` and ${emailList.split('\n').length - 1} more emails` : ''}`);
+      addLog(`Starting ${toolName} analysis for: ${input}`);
       setProgress(10);
 
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -147,11 +115,7 @@ const ToolExecutor: React.FC<ToolExecutorProps> = ({ selectedTool, toolName, inp
       setProgress(25);
 
       await new Promise(resolve => setTimeout(resolve, 800));
-      if (isEmailValidationTool) {
-        addLog('Validating email addresses...');
-      } else {
-        addLog('Performing DNS lookups...');
-      }
+      addLog('Performing DNS lookups...');
       setProgress(50);
 
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -162,7 +126,7 @@ const ToolExecutor: React.FC<ToolExecutorProps> = ({ selectedTool, toolName, inp
       addLog('Generating report...');
       setProgress(90);
 
-      const simulatedResult = generateToolResponse(selectedTool, analysisInput, toolName);
+      const simulatedResult = generateToolResponse(selectedTool, input, toolName);
       setResult(simulatedResult);
       setProgress(100);
       addLog('Analysis completed successfully!');
@@ -216,65 +180,15 @@ const ToolExecutor: React.FC<ToolExecutorProps> = ({ selectedTool, toolName, inp
           </div>
           
           <div className="space-y-4">
-            {isEmailValidationTool ? (
-              <div className="space-y-3">
-                <div>
-                  <label className="text-sm font-medium text-[#212529] mb-2 block">
-                    Email Addresses (one per line, max {isPaidUser ? 'unlimited' : '10'} for free users)
-                  </label>
-                  <Textarea
-                    placeholder="Enter email addresses, one per line..."
-                    value={emailList}
-                    onChange={(e) => setEmailList(e.target.value)}
-                    className="min-h-[120px] border-[#dee2e6] bg-white text-[#212529] placeholder:text-[#6c757d] focus:border-[#0d6efd] focus:ring-[#0d6efd]"
-                    rows={10}
-                  />
-                  <p className="text-xs text-[#6c757d] mt-1">
-                    {emailList.split('\n').filter(email => email.trim()).length} emails entered
-                    {!isPaidUser && ` (${Math.max(0, 10 - emailList.split('\n').filter(email => email.trim()).length)} remaining for free users)`}
-                  </p>
-                </div>
-                
-                {isPaidUser && (
-                  <div>
-                    <label className="text-sm font-medium text-[#212529] mb-2 block">
-                      Or upload a file (TXT/CSV)
-                    </label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="file"
-                        accept=".txt,.csv"
-                        onChange={handleFileUpload}
-                        className="hidden"
-                        id="email-file-upload"
-                      />
-                      <label
-                        htmlFor="email-file-upload"
-                        className="flex items-center gap-2 px-3 py-2 border border-[#dee2e6] rounded-md cursor-pointer hover:bg-[#f8f9fa] text-sm text-[#6c757d]"
-                      >
-                        <Upload className="w-4 h-4" />
-                        Choose File
-                      </label>
-                      {uploadedFile && (
-                        <span className="text-sm text-[#28a745]">
-                          {uploadedFile.name} uploaded
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div>
-                <Input
-                  placeholder={`Enter ${inputType}...`}
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  className="border-[#dee2e6] bg-white text-[#212529] placeholder:text-[#6c757d] focus:border-[#0d6efd] focus:ring-[#0d6efd]"
-                  onKeyPress={(e) => e.key === 'Enter' && handleExecute()}
-                />
-              </div>
-            )}
+            <div>
+              <Input
+                placeholder={`Enter ${inputType}...`}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                className="border-[#dee2e6] bg-white text-[#212529] placeholder:text-[#6c757d] focus:border-[#0d6efd] focus:ring-[#0d6efd]"
+                onKeyPress={(e) => e.key === 'Enter' && handleExecute()}
+              />
+            </div>
 
             <div className="flex items-center justify-between">
               <div className="flex-1">
@@ -331,13 +245,13 @@ const ToolExecutor: React.FC<ToolExecutorProps> = ({ selectedTool, toolName, inp
         isLoading={isLoading}
         progress={progress}
         logs={logs}
-        input={isEmailValidationTool ? emailList : input}
+        input={input}
       />
 
       {/* Results */}
       <ToolResults 
         result={result}
-        input={isEmailValidationTool ? emailList : input}
+        input={input}
         toolId={selectedTool}
       />
     </div>

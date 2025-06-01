@@ -53,7 +53,7 @@ const Pricing = () => {
       popular: true,
       features: [
         '**Verify up to 100,000 emails per month** – Perfect for marketing campaigns and list management',
-        '**20 email migrations per day** (unlimited size) – Seamless email transfers',
+        '**20 email migrations per day** (unlimited size) – Seamless email transfers to **same account only**',
         '**All IP & DNS tools without CAPTCHA** – Uninterrupted workflow and productivity',
         '**Email deliverability testing** – Ensure your emails reach the inbox',
         '**Advanced SPF/DKIM generators** – Secure your email authentication',
@@ -63,7 +63,8 @@ const Pricing = () => {
       ],
       limitations: [
         'Email support only (no phone)',
-        'Standard SLA response times'
+        'Standard SLA response times',
+        'Migration limited to same username@domain'
       ]
     },
     {
@@ -79,9 +80,9 @@ const Pricing = () => {
       targetAudience: 'For large organizations and enterprise infrastructure',
       features: [
         '**Process 1M+ email verifications monthly** – Handle massive email databases with ease',
-        '**100 email migrations daily** (unlimited size) – Enterprise-grade email transitions',
+        '**100 email migrations daily** (unlimited size) – **Cross-account migration allowed** between any email addresses',
         '**Complete tool suite access** – No limits, no restrictions, full power',
-        '**Advanced IMAP email migration** – Sophisticated email server transfers',
+        '**Advanced IMAP email migration** – Sophisticated email server transfers with full flexibility',
         '**24/7 priority support with SLA** – Guaranteed response times and dedicated assistance',
         '**Custom API integrations** – Build ToolWeb.io into your existing workflows',
         '**Full API access** – Automate all network diagnostics and email tools',
@@ -244,8 +245,8 @@ const Pricing = () => {
             <CardContent>
               <div className="space-y-2 text-sm text-green-700">
                 <div>Free: 10 GB/account</div>
-                <div>Pro: 20 migrations/day</div>
-                <div>Enterprise: 100/day</div>
+                <div>Pro: 20 migrations/day (same account)</div>
+                <div>Enterprise: 100/day (cross-account)</div>
               </div>
             </CardContent>
           </Card>

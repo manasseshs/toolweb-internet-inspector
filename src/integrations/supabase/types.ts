@@ -9,6 +9,96 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      email_migrations: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          destination_email: string
+          destination_host: string
+          destination_password_encrypted: string
+          error_message: string | null
+          id: string
+          migration_log: Json | null
+          progress_percentage: number | null
+          source_email: string
+          source_host: string
+          source_password_encrypted: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          destination_email: string
+          destination_host: string
+          destination_password_encrypted: string
+          error_message?: string | null
+          id?: string
+          migration_log?: Json | null
+          progress_percentage?: number | null
+          source_email: string
+          source_host: string
+          source_password_encrypted: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          destination_email?: string
+          destination_host?: string
+          destination_password_encrypted?: string
+          error_message?: string | null
+          id?: string
+          migration_log?: Json | null
+          progress_percentage?: number | null
+          source_email?: string
+          source_host?: string
+          source_password_encrypted?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      email_verifications: {
+        Row: {
+          created_at: string
+          email_address: string
+          id: string
+          smtp_response_code: string | null
+          smtp_response_message: string | null
+          smtp_server: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          verification_details: Json | null
+        }
+        Insert: {
+          created_at?: string
+          email_address: string
+          id?: string
+          smtp_response_code?: string | null
+          smtp_response_message?: string | null
+          smtp_server?: string | null
+          status: string
+          updated_at?: string
+          user_id: string
+          verification_details?: Json | null
+        }
+        Update: {
+          created_at?: string
+          email_address?: string
+          id?: string
+          smtp_response_code?: string | null
+          smtp_response_message?: string | null
+          smtp_server?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          verification_details?: Json | null
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string | null
@@ -132,6 +222,77 @@ export type Database = {
           subscription_tier?: string | null
           updated_at?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      support_ticket_messages: {
+        Row: {
+          attachments: Json | null
+          created_at: string
+          id: string
+          is_admin_reply: boolean
+          message: string
+          ticket_id: string
+          user_id: string | null
+        }
+        Insert: {
+          attachments?: Json | null
+          created_at?: string
+          id?: string
+          is_admin_reply?: boolean
+          message: string
+          ticket_id: string
+          user_id?: string | null
+        }
+        Update: {
+          attachments?: Json | null
+          created_at?: string
+          id?: string
+          is_admin_reply?: boolean
+          message?: string
+          ticket_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_ticket_messages_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_tickets: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          priority: string
+          status: string
+          subject: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: string
+          priority?: string
+          status?: string
+          subject: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          priority?: string
+          status?: string
+          subject?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
