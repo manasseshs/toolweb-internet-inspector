@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -51,7 +52,7 @@ const EmailMigrationForm: React.FC<EmailMigrationFormProps> = ({
     { name: 'Outlook/Hotmail', host: 'outlook.office365.com', port: 993 },
     { name: 'Yahoo', host: 'imap.mail.yahoo.com', port: 993 },
     { name: 'iCloud', host: 'imap.mail.me.com', port: 993 },
-    { name: 'Custom', host: '', port: 993 }
+    { name: 'Custom', host: 'custom', port: 993 }
   ];
 
   const testConnection = async (host: string, port: number, email: string, password: string, type: 'source' | 'destination') => {
@@ -124,13 +125,13 @@ const EmailMigrationForm: React.FC<EmailMigrationFormProps> = ({
     const provider = commonProviders.find(p => p.host === host);
     
     if (type === 'source') {
-      setSourceHost(host);
+      setSourceHost(host === 'custom' ? '' : host);
       setSourcePort(provider?.port || 993);
-      setShowSourceCustomPort(host === '');
+      setShowSourceCustomPort(host === 'custom');
     } else {
-      setDestinationHost(host);
+      setDestinationHost(host === 'custom' ? '' : host);
       setDestinationPort(provider?.port || 993);
-      setShowDestinationCustomPort(host === '');
+      setShowDestinationCustomPort(host === 'custom');
     }
     
     setConnectionTests(prev => ({ ...prev, [type]: undefined }));
