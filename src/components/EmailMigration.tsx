@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -9,12 +8,12 @@ const EmailMigration: React.FC = () => {
   const [migrations, setMigrations] = useState<any[]>([]);
   const { user } = useAuth();
 
-  const validateMigration = () => {
-    if (!user) return { valid: false, message: 'Please log in to use migration.', type: 'error' };
+  const validateMigration = (): { valid: boolean; message: string; type: 'error' | 'warning' | 'success' | 'info' } => {
+    if (!user) return { valid: false, message: 'Please log in to use migration.', type: 'error' as const };
 
     // For validation we need both emails to be set, but since this is called from the form
     // we'll need to pass the emails as parameters. For now, return a basic validation.
-    return { valid: true, message: 'Validation will be checked on form submission', type: 'info' };
+    return { valid: true, message: 'Validation will be checked on form submission', type: 'info' as const };
   };
 
   const fetchMigrations = async () => {

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,7 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import ConnectionTest from './ConnectionTest';
 import PlanValidation from './PlanValidation';
 
-interface ConnectionTest {
+interface ConnectionTestState {
   host: string;
   port: number;
   status: 'testing' | 'success' | 'failed' | 'pending';
@@ -41,8 +40,8 @@ const EmailMigrationForm: React.FC<EmailMigrationFormProps> = ({
   const [showDestinationCustomPort, setShowDestinationCustomPort] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [connectionTests, setConnectionTests] = useState<{
-    source?: ConnectionTest;
-    destination?: ConnectionTest;
+    source?: ConnectionTestState;
+    destination?: ConnectionTestState;
   }>({});
   
   const { toast } = useToast();
@@ -58,7 +57,7 @@ const EmailMigrationForm: React.FC<EmailMigrationFormProps> = ({
   const testConnection = async (host: string, port: number, email: string, password: string, type: 'source' | 'destination') => {
     if (!host || !email || !password) return;
 
-    const testData: ConnectionTest = {
+    const testData: ConnectionTestState = {
       host,
       port,
       status: 'testing'
