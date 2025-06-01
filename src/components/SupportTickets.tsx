@@ -321,10 +321,10 @@ const SupportTickets: React.FC = () => {
                     <div className="flex items-center justify-between mb-2">
                       <h4 className="font-medium text-sm">{ticket.subject}</h4>
                       <div className="flex gap-1">
-                        <Badge className={getStatusColor(ticket.status)} size="sm">
+                        <Badge className={getStatusColor(ticket.status)}>
                           {ticket.status}
                         </Badge>
-                        <Badge className={getPriorityColor(ticket.priority)} size="sm">
+                        <Badge className={getPriorityColor(ticket.priority)}>
                           {ticket.priority}
                         </Badge>
                       </div>
