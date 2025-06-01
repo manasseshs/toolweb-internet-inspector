@@ -41,10 +41,11 @@ export const enhancedEmailVerification = async (email: string): Promise<Verifica
   console.log(`Provider detected: ${provider} for ${email}`);
   console.log(`Provider config:`, config);
 
-  // Simulate multi-step verification for providers that always accept
+  // Simulate multi-step verification for providers that sometimes always accept
   if (config.requiresMultiStep) {
     console.log(`Starting multi-step verification for ${provider} provider`);
     const attempts = [];
+    let hasValidRejection = false;
     
     for (let attempt = 1; attempt <= config.maxAttempts; attempt++) {
       console.log(`Verification attempt ${attempt}/${config.maxAttempts} for ${email}`);
@@ -63,6 +64,7 @@ export const enhancedEmailVerification = async (email: string): Promise<Verifica
       // If we get a clear rejection, we can trust it
       if (attemptResult.responseCode !== '250') {
         console.log(`Got definitive rejection on attempt ${attempt}: ${attemptResult.responseCode} - ${attemptResult.responseMessage}`);
+        hasValidRejection = true;
         return {
           email,
           status: 'invalid',
@@ -84,28 +86,60 @@ export const enhancedEmailVerification = async (email: string): Promise<Verifica
       }
     }
 
-    // All attempts returned 250 OK - this is suspicious for Gmail/Outlook
-    console.log(`All ${config.maxAttempts} attempts returned 250 OK for ${email} - marking as unconfirmed`);
+    // All attempts returned 250 OK - for Gmail/Outlook this is common behavior
+    // but we should be more lenient and mark as valid with lower confidence
+    // unless there are other indicators of problems
+    console.log(`All ${config.maxAttempts} attempts returned 250 OK for ${email}`);
     
-    return {
-      email,
-      status: 'unconfirmed',
-      confidence: 'low',
-      provider,
-      smtp_server: `mx.${domain}`,
-      smtp_response_code: '250',
-      smtp_response_message: `Valid? (Unconfirmed – ${provider.toUpperCase()} always accepts RCPT)`,
-      verification_attempts: config.maxAttempts,
-      details: {
-        syntax_valid: true,
-        mx_found: true,
-        smtp_check: true,
-        provider_behavior: 'always_accepts',
-        attempts_log: attempts,
-        reason: `${provider.toUpperCase()} provider detected - multiple 250 OK responses indicate potential false positive`,
-        confidence_note: 'This provider typically accepts all RCPT TO commands during SMTP handshake'
-      }
-    };
+    // Check if this looks like a real email pattern (not random characters)
+    const hasReasonablePattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
+    const isCommonProvider = ['gmail', 'outlook', 'yahoo'].includes(provider);
+    
+    if (hasReasonablePattern && isCommonProvider) {
+      // For common providers with reasonable email patterns, mark as valid but with medium/low confidence
+      console.log(`Marking ${email} as valid with medium confidence due to reasonable pattern`);
+      return {
+        email,
+        status: 'valid',
+        confidence: 'medium',
+        provider,
+        smtp_server: `mx.${domain}`,
+        smtp_response_code: '250',
+        smtp_response_message: `Valid – ${provider.toUpperCase()} accepts most addresses`,
+        verification_attempts: config.maxAttempts,
+        details: {
+          syntax_valid: true,
+          mx_found: true,
+          smtp_check: true,
+          provider_behavior: 'always_accepts',
+          attempts_log: attempts,
+          reason: `${provider.toUpperCase()} provider with reasonable email pattern`,
+          confidence_note: 'Common provider that accepts most RCPT TO commands, but email pattern looks legitimate'
+        }
+      };
+    } else {
+      // For suspicious patterns or uncommon scenarios, mark as unconfirmed
+      console.log(`Marking ${email} as unconfirmed due to suspicious pattern or provider behavior`);
+      return {
+        email,
+        status: 'unconfirmed',
+        confidence: 'low',
+        provider,
+        smtp_server: `mx.${domain}`,
+        smtp_response_code: '250',
+        smtp_response_message: `Unconfirmed – ${provider.toUpperCase()} always accepts RCPT`,
+        verification_attempts: config.maxAttempts,
+        details: {
+          syntax_valid: true,
+          mx_found: true,
+          smtp_check: true,
+          provider_behavior: 'always_accepts',
+          attempts_log: attempts,
+          reason: `${provider.toUpperCase()} provider with unusual pattern or multiple 250 OK responses indicate potential false positive`,
+          confidence_note: 'This provider typically accepts all RCPT TO commands during SMTP handshake'
+        }
+      };
+    }
   }
 
   // Single verification for trusted providers
@@ -201,7 +235,7 @@ const simulateSingleVerification = async (email: string, domain: string, provide
   
   // Yahoo and other providers - more reliable but still some false positives
   if (provider === 'yahoo') {
-    if (random < 0.75) {
+    if (random < 0.85) {
       console.log(`[${timestamp}] Yahoo SMTP: 250 OK`);
       return {
         smtpServer: `mx.${domain}`,
@@ -219,7 +253,7 @@ const simulateSingleVerification = async (email: string, domain: string, provide
   }
   
   // Other providers - generally more reliable
-  if (random < 0.7) {
+  if (random < 0.8) {
     console.log(`[${timestamp}] ${provider} SMTP: 250 OK`);
     return {
       smtpServer: `mx.${domain}`,

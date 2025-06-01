@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -27,12 +26,23 @@ const UserManagement = () => {
 
   const fetchProfiles = async () => {
     try {
+      console.log('Fetching all profiles...');
+      setLoading(true);
+      
+      // Wait a bit to ensure any recent user creation has propagated
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching profiles:', error);
+        throw error;
+      }
+      
+      console.log(`Fetched ${data?.length || 0} profiles:`, data);
       setProfiles(data || []);
     } catch (error: any) {
       console.error('Error fetching profiles:', error);
@@ -44,6 +54,19 @@ const UserManagement = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleUserAdded = async () => {
+    console.log('New user added, refreshing profiles list...');
+    toast({
+      title: "User Created",
+      description: "Refreshing user list...",
+    });
+    
+    // Refresh the profiles list with a slight delay to ensure the profile is created
+    setTimeout(() => {
+      fetchProfiles();
+    }, 1000);
   };
 
   const updateUserStatus = async (userId: string, status: 'active' | 'disabled') => {
@@ -127,7 +150,7 @@ const UserManagement = () => {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <UserStats userCount={profiles.length} />
-        <AddUserDialog onUserAdded={fetchProfiles} />
+        <AddUserDialog onUserAdded={handleUserAdded} />
       </div>
 
       <UserTable
