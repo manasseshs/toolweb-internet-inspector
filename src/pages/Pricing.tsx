@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Network, Check, Star, Zap, Crown, ArrowLeft, CreditCard, Mail, Database, Shield } from 'lucide-react';
@@ -23,13 +24,14 @@ const Pricing = () => {
       icon: Star,
       price: { monthly: 0, annual: 0 },
       priceId: { monthly: null, annual: null },
-      description: 'Perfect for getting started',
+      description: 'Perfect for getting started with network diagnostics',
+      targetAudience: 'For individuals and small projects',
       features: [
-        '10 emails verification per day',
-        'Basic IP & DNS tools (with CAPTCHA)',
-        '10 GB email migration per account',
-        'Community support',
-        'Rate limited access'
+        '**10 email verifications per day** – Test email validity for small lists',
+        '**Basic IP & DNS tools** (with CAPTCHA) – Essential network diagnostics',
+        '**10 GB email migration** per account – Move your email data safely',
+        '**Community support** – Get help from our user community',
+        '**Rate limited access** – All core tools available with usage limits'
       ],
       limitations: [
         'CAPTCHA required for all tools',
@@ -46,21 +48,22 @@ const Pricing = () => {
         monthly: 'price_1RV28rRvd8wXgl1xGe5tGa6u',
         annual: 'price_1RV2B0Rvd8wXgl1xBjHIT3RL'
       },
-      description: 'For professionals and teams',
+      description: 'Professional-grade tools for growing teams and businesses',
+      targetAudience: 'For growing teams and email marketers',
       popular: true,
       features: [
-        '100,000 email verifications per month',
-        '20 email migrations per day (any size)',
-        'All IP & DNS tools (no CAPTCHA)',
-        'Email deliverability tests',
-        'SPF/DKIM generators',
-        'Priority support',
-        'Advanced diagnostics',
-        'Export reports'
+        '**Verify up to 100,000 emails per month** – Perfect for marketing campaigns and list management',
+        '**20 email migrations per day** (unlimited size) – Seamless email transfers',
+        '**All IP & DNS tools without CAPTCHA** – Uninterrupted workflow and productivity',
+        '**Email deliverability testing** – Ensure your emails reach the inbox',
+        '**Advanced SPF/DKIM generators** – Secure your email authentication',
+        '**Priority email support** – Get expert help when you need it',
+        '**Advanced diagnostic reports** – Deep insights into your network infrastructure',
+        '**Export detailed reports** – Share findings with your team'
       ],
       limitations: [
-        'Limited to Pro features',
-        'Email support only'
+        'Email support only (no phone)',
+        'Standard SLA response times'
       ]
     },
     {
@@ -72,17 +75,18 @@ const Pricing = () => {
         monthly: 'price_1RV29bRvd8wXgl1x8nO3IvV7',
         annual: 'price_1RV2CBRvd8wXgl1x9OvEK4ZV'
       },
-      description: 'For large organizations',
+      description: 'Enterprise-scale infrastructure monitoring and management',
+      targetAudience: 'For large organizations and enterprise infrastructure',
       features: [
-        '1,000,000 email verifications per month',
-        '100 email migrations per day (unlimited size)',
-        'All tools included (no limits)',
-        'Email migration (IMAP)',
-        '24/7 priority support',
-        'Custom integrations',
-        'API access',
-        'Dedicated account manager',
-        'SLA guarantee'
+        '**Process 1M+ email verifications monthly** – Handle massive email databases with ease',
+        '**100 email migrations daily** (unlimited size) – Enterprise-grade email transitions',
+        '**Complete tool suite access** – No limits, no restrictions, full power',
+        '**Advanced IMAP email migration** – Sophisticated email server transfers',
+        '**24/7 priority support with SLA** – Guaranteed response times and dedicated assistance',
+        '**Custom API integrations** – Build ToolWeb.io into your existing workflows',
+        '**Full API access** – Automate all network diagnostics and email tools',
+        '**Dedicated account manager** – Personal point of contact for your organization',
+        '**99.9% SLA guarantee** – Enterprise-level reliability and uptime'
       ],
       limitations: []
     }
@@ -201,12 +205,18 @@ const Pricing = () => {
             Unlock powerful network and email diagnostic tools
           </p>
           
-          {/* Billing Toggle */}
+          {/* Improved Billing Toggle */}
           <div className="flex items-center justify-center space-x-4 mb-8">
-            <span className={`text-sm ${!isAnnual ? 'text-gray-900' : 'text-gray-600'}`}>Monthly</span>
-            <Switch checked={isAnnual} onCheckedChange={setIsAnnual} />
-            <span className={`text-sm ${isAnnual ? 'text-gray-900' : 'text-gray-600'}`}>Annual</span>
-            <Badge variant="secondary" className="bg-green-100 text-green-800">Save 17%</Badge>
+            <span className={`text-sm font-medium transition-colors ${!isAnnual ? 'text-blue-600' : 'text-gray-500'}`}>Monthly</span>
+            <div className="relative">
+              <Switch 
+                checked={isAnnual} 
+                onCheckedChange={setIsAnnual}
+                className="data-[state=checked]:bg-blue-500 data-[state=unchecked]:bg-gray-300"
+              />
+            </div>
+            <span className={`text-sm font-medium transition-colors ${isAnnual ? 'text-blue-600' : 'text-gray-500'}`}>Annual</span>
+            <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">Save 17%</Badge>
           </div>
         </div>
 
@@ -285,7 +295,8 @@ const Pricing = () => {
                     </div>
                   </div>
                   <CardTitle className="text-gray-900 text-2xl">{plan.name}</CardTitle>
-                  <CardDescription className="text-gray-600">{plan.description}</CardDescription>
+                  <CardDescription className="text-gray-600 mb-2">{plan.description}</CardDescription>
+                  <p className="text-sm font-medium text-blue-600">{plan.targetAudience}</p>
                   
                   <div className="py-4">
                     <div className="text-4xl font-bold text-gray-900">
@@ -307,9 +318,12 @@ const Pricing = () => {
                 <CardContent>
                   <div className="space-y-3 mb-6">
                     {plan.features.map((feature, index) => (
-                      <div key={index} className="flex items-center space-x-3">
-                        <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
-                        <span className="text-gray-700 text-sm">{feature}</span>
+                      <div key={index} className="flex items-start space-x-3">
+                        <Check className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                        <span 
+                          className="text-gray-700 text-sm leading-relaxed"
+                          dangerouslySetInnerHTML={{ __html: feature }}
+                        />
                       </div>
                     ))}
                   </div>
@@ -380,6 +394,53 @@ const Pricing = () => {
           </div>
         </div>
       </div>
+
+      {/* Global Footer */}
+      <footer className="bg-white border-t border-gray-200 mt-8">
+        <div className="container mx-auto px-4 py-8">
+          <div className="grid md:grid-cols-4 gap-6">
+            <div>
+              <div className="flex items-center space-x-3 mb-3">
+                <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                  <Network className="w-5 h-5 text-white" />
+                </div>
+                <h3 className="text-lg font-bold text-gray-900">ToolWeb.io</h3>
+              </div>
+              <p className="text-gray-600 text-sm">The essential toolkit for domains, IP addresses, and network diagnostics.</p>
+            </div>
+            <div>
+              <h4 className="text-gray-900 font-semibold mb-3 text-sm">Popular Tools</h4>
+              <ul className="space-y-2 text-sm text-gray-600">
+                <li><a href="/blacklist-check" className="hover:text-blue-500 transition-colors">Blacklist Check</a></li>
+                <li><a href="/mx-record" className="hover:text-blue-500 transition-colors">MX Lookup</a></li>
+                <li><a href="/ping-test" className="hover:text-blue-500 transition-colors">Ping Test</a></li>
+                <li><a href="/whois-lookup" className="hover:text-blue-500 transition-colors">WHOIS</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-gray-900 font-semibold mb-3 text-sm">Account</h4>
+              <ul className="space-y-2 text-sm text-gray-600">
+                <li><a href="/login" className="hover:text-blue-500 transition-colors">Login</a></li>
+                <li><a href="/register" className="hover:text-blue-500 transition-colors">Register</a></li>
+                <li><a href="/pricing" className="hover:text-blue-500 transition-colors">Pricing</a></li>
+                <li><a href="/dashboard" className="hover:text-blue-500 transition-colors">Dashboard</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-gray-900 font-semibold mb-3 text-sm">Support</h4>
+              <ul className="space-y-2 text-sm text-gray-600">
+                <li><a href="/contact" className="hover:text-blue-500 transition-colors">Contact Us</a></li>
+                <li><a href="/help" className="hover:text-blue-500 transition-colors">Help Center</a></li>
+                <li><a href="/privacy" className="hover:text-blue-500 transition-colors">Privacy Policy</a></li>
+                <li><a href="/terms" className="hover:text-blue-500 transition-colors">Terms of Use</a></li>
+              </ul>
+            </div>
+          </div>
+          <div className="border-t border-gray-200 mt-6 pt-6 text-center text-gray-600 text-sm">
+            <p>&copy; 2024 ToolWeb.io. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };

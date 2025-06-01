@@ -39,34 +39,34 @@ const CaptchaComponent: React.FC<CaptchaComponentProps> = ({ onVerify, isRequire
   }
 
   return (
-    <Card className="border-[#dee2e6] bg-white shadow-sm max-w-[320px] mx-auto">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-xs font-medium text-[#6c757d] flex items-center gap-2">
-          🔒 Security Check
+    <Card className="border-gray-200 bg-white shadow-sm max-w-[320px] mx-auto">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm font-medium text-gray-700 flex items-center gap-2">
+          🔒 Security Verification
         </CardTitle>
       </CardHeader>
-      <CardContent className="pt-0 pb-3">
-        <div className="space-y-2">
-          <div className="flex flex-col items-center gap-2">
+      <CardContent className="pt-0 pb-4">
+        <div className="space-y-3">
+          <div className="flex flex-col items-center gap-3 bg-gray-50 rounded-lg p-4 border border-gray-100">
             {isLoaded && (
               <ReCAPTCHA
                 sitekey={RECAPTCHA_SITE_KEY}
                 onChange={handleRecaptchaChange}
                 onExpired={handleRecaptchaExpired}
                 theme="light"
-                size="compact"
+                size="normal"
               />
             )}
             {!isLoaded && (
-              <div className="w-[164px] h-[144px] bg-[#f8f9fa] border border-[#dee2e6] rounded flex items-center justify-center">
-                <div className="text-xs text-[#6c757d]">Loading...</div>
+              <div className="w-[304px] h-[78px] bg-white border border-gray-300 rounded flex items-center justify-center">
+                <div className="text-sm text-gray-500">Loading security check...</div>
               </div>
             )}
           </div>
           
           {isVerified && (
-            <div className="text-[#28a745] text-xs font-medium flex items-center gap-1 justify-center">
-              ✅ Verified
+            <div className="text-green-600 text-sm font-medium flex items-center gap-2 justify-center bg-green-50 rounded-lg p-2">
+              ✅ Verification successful
             </div>
           )}
         </div>
