@@ -1,15 +1,13 @@
+
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { MessageSquare, Plus, Send } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import NewTicketForm from './support/NewTicketForm';
+import TicketList from './support/TicketList';
+import MessageThread from './support/MessageThread';
 
 interface Ticket {
   id: string;
@@ -43,21 +41,6 @@ const SupportTickets: React.FC = () => {
   
   const { user } = useAuth();
   const { toast } = useToast();
-
-  const categories = [
-    { value: 'technical', label: 'Technical Support' },
-    { value: 'billing', label: 'Billing & Account' },
-    { value: 'feature_request', label: 'Feature Request' },
-    { value: 'bug_report', label: 'Bug Report' },
-    { value: 'general', label: 'General Inquiry' }
-  ];
-
-  const priorities = [
-    { value: 'low', label: 'Low' },
-    { value: 'normal', label: 'Normal' },
-    { value: 'high', label: 'High' },
-    { value: 'urgent', label: 'Urgent' }
-  ];
 
   const fetchTickets = async () => {
     if (!user) return;
@@ -176,6 +159,14 @@ const SupportTickets: React.FC = () => {
     }
   };
 
+  const handleFormChange = (field: string, value: string) => {
+    setNewTicketData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleTicketSelect = (ticketId: string) => {
+    setSelectedTicket(ticketId);
+  };
+
   useEffect(() => {
     fetchTickets();
   }, [user]);
@@ -185,25 +176,6 @@ const SupportTickets: React.FC = () => {
       fetchMessages(selectedTicket);
     }
   }, [selectedTicket]);
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'open': return 'bg-blue-100 text-blue-800';
-      case 'replied': return 'bg-green-100 text-green-800';
-      case 'closed': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'urgent': return 'bg-red-100 text-red-800';
-      case 'high': return 'bg-orange-100 text-orange-800';
-      case 'normal': return 'bg-blue-100 text-blue-800';
-      case 'low': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
 
   const selectedTicketData = tickets.find(t => t.id === selectedTicket);
 
@@ -217,187 +189,28 @@ const SupportTickets: React.FC = () => {
         </Button>
       </div>
 
-      {showNewTicket && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Create New Ticket</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={createTicket} className="space-y-4">
-              <div>
-                <Label htmlFor="subject">Subject</Label>
-                <Input
-                  id="subject"
-                  placeholder="Brief description of your issue"
-                  value={newTicketData.subject}
-                  onChange={(e) => setNewTicketData(prev => ({ ...prev, subject: e.target.value }))}
-                  required
-                />
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="category">Category</Label>
-                  <Select
-                    value={newTicketData.category}
-                    onValueChange={(value) => setNewTicketData(prev => ({ ...prev, category: value }))}
-                    required
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((cat) => (
-                        <SelectItem key={cat.value} value={cat.value}>
-                          {cat.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="priority">Priority</Label>
-                  <Select
-                    value={newTicketData.priority}
-                    onValueChange={(value) => setNewTicketData(prev => ({ ...prev, priority: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {priorities.map((pri) => (
-                        <SelectItem key={pri.value} value={pri.value}>
-                          {pri.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="message">Message</Label>
-                <Textarea
-                  id="message"
-                  placeholder="Describe your issue in detail..."
-                  value={newTicketData.message}
-                  onChange={(e) => setNewTicketData(prev => ({ ...prev, message: e.target.value }))}
-                  className="min-h-[120px]"
-                  required
-                />
-              </div>
-
-              <div className="flex gap-2">
-                <Button type="submit">Create Ticket</Button>
-                <Button type="button" variant="outline" onClick={() => setShowNewTicket(false)}>
-                  Cancel
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      )}
+      <NewTicketForm
+        isVisible={showNewTicket}
+        onCancel={() => setShowNewTicket(false)}
+        onSubmit={createTicket}
+        formData={newTicketData}
+        onFormChange={handleFormChange}
+      />
 
       <div className="grid lg:grid-cols-2 gap-6">
-        {/* Tickets List */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Your Tickets</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {tickets.length === 0 ? (
-              <p className="text-gray-500 text-center py-8">No tickets found. Create your first ticket above.</p>
-            ) : (
-              <div className="space-y-3">
-                {tickets.map((ticket) => (
-                  <div
-                    key={ticket.id}
-                    className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                      selectedTicket === ticket.id ? 'border-blue-500 bg-blue-50' : 'hover:bg-gray-50'
-                    }`}
-                    onClick={() => setSelectedTicket(ticket.id)}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium text-sm">{ticket.subject}</h4>
-                      <div className="flex gap-1">
-                        <Badge className={getStatusColor(ticket.status)}>
-                          {ticket.status}
-                        </Badge>
-                        <Badge className={getPriorityColor(ticket.priority)}>
-                          {ticket.priority}
-                        </Badge>
-                      </div>
-                    </div>
-                    <p className="text-xs text-gray-500">
-                      {categories.find(c => c.value === ticket.category)?.label} •{' '}
-                      {new Date(ticket.created_at).toLocaleDateString()}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <TicketList
+          tickets={tickets}
+          selectedTicketId={selectedTicket}
+          onTicketSelect={handleTicketSelect}
+        />
 
-        {/* Messages */}
-        {selectedTicketData && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MessageSquare className="w-5 h-5" />
-                {selectedTicketData.subject}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="max-h-96 overflow-y-auto space-y-3">
-                  {messages.map((message) => (
-                    <div
-                      key={message.id}
-                      className={`p-3 rounded-lg ${
-                        message.is_admin_reply
-                          ? 'bg-blue-50 border-l-4 border-blue-500'
-                          : 'bg-gray-50 border-l-4 border-gray-300'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium">
-                          {message.is_admin_reply ? 'Support Team' : 'You'}
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          {new Date(message.created_at).toLocaleString()}
-                        </span>
-                      </div>
-                      <p className="text-sm">{message.message}</p>
-                    </div>
-                  ))}
-                </div>
-
-                {selectedTicketData.status !== 'closed' && (
-                  <form onSubmit={sendMessage} className="space-y-3">
-                    <Textarea
-                      placeholder="Type your message..."
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      className="min-h-[80px]"
-                    />
-                    <Button type="submit" disabled={!newMessage.trim()}>
-                      <Send className="w-4 h-4 mr-2" />
-                      Send Message
-                    </Button>
-                  </form>
-                )}
-
-                {selectedTicketData.status === 'closed' && (
-                  <p className="text-center text-gray-500 py-4">
-                    This ticket has been closed. Create a new ticket if you need further assistance.
-                  </p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        <MessageThread
+          ticket={selectedTicketData || null}
+          messages={messages}
+          newMessage={newMessage}
+          onNewMessageChange={setNewMessage}
+          onSendMessage={sendMessage}
+        />
       </div>
     </div>
   );
