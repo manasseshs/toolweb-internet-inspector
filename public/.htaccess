@@ -1,28 +1,25 @@
 
-# OpenLiteSpeed SPA Configuration for ToolWeb.io
-RewriteEngine On
+<IfModule LiteSpeed>
+  RewriteEngine On
 
-# Handle CORS preflight requests
-RewriteCond %{REQUEST_METHOD} OPTIONS
-RewriteRule ^(.*)$ $1 [R=200,L]
+  # Handle CORS preflight requests
+  RewriteCond %{REQUEST_METHOD} OPTIONS
+  RewriteRule ^(.*)$ $1 [R=200,L]
 
-# API routes should be proxied to backend - IMPORTANT: This must be configured in OpenLiteSpeed Virtual Host
-# Add Script Handler in OpenLiteSpeed:
-# Suffixes: api
-# Type: Proxy  
-# URI: http://localhost:5000/
-RewriteCond %{REQUEST_URI} ^/api/
-RewriteRule ^api/(.*)$ http://localhost:5000/api/$1 [P,L]
+  # API routes should be proxied to backend - handled by LiteSpeed Virtual Host
+  RewriteCond %{REQUEST_URI} ^/api/ [NC]
+  RewriteRule .* - [L]
 
-# Static assets should not be rewritten
-RewriteCond %{REQUEST_URI} \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|map|json)$ [NC]
-RewriteRule ^(.*)$ - [L]
+  # Static assets should not be rewritten
+  RewriteCond %{REQUEST_URI} \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|map|json)$ [NC]
+  RewriteRule ^(.*)$ - [L]
 
-# SPA routing - redirect all other requests to index.html
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_URI} !^/api/
-RewriteRule ^(.*)$ /index.html [QSA,L]
+  # SPA routing - redirect all other requests to index.html
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_URI} !^/api/
+  RewriteRule ^(.*)$ /index.html [QSA,L]
+</IfModule>
 
 # Set proper MIME types
 <IfModule mod_mime.c>
