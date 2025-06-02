@@ -1,3 +1,4 @@
+
 // Use relative path for production with reverse proxy, fallback to localhost for local development
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
   (import.meta.env.DEV ? 'http://localhost:5000/api' : '/api');
@@ -102,10 +103,14 @@ class ApiService {
       
       console.log(`Making request to: ${url}`);
       console.log('Request options:', { ...options, body: options.body ? 'REQUEST_BODY_PRESENT' : 'NO_BODY' });
+      console.log('Environment:', import.meta.env.DEV ? 'development' : 'production');
+      console.log('API Base URL:', API_BASE_URL);
       
       // Only show localhost warning in development mode
       if (import.meta.env.DEV && API_BASE_URL.includes('localhost')) {
         console.warn('Using localhost API - ensure backend is running on port 5000');
+      } else if (!import.meta.env.DEV) {
+        console.log('Production mode: using relative API paths for reverse proxy');
       }
 
       const response = await fetch(url, {
@@ -117,6 +122,7 @@ class ApiService {
       });
 
       console.log(`Response status: ${response.status} ${response.statusText}`);
+      console.log(`Response URL: ${response.url}`);
 
       const data = await response.json();
       console.log(`Response from ${endpoint}:`, data);
@@ -141,9 +147,15 @@ class ApiService {
       
       // Provide more specific error messages
       if (error instanceof TypeError && error.message === 'Failed to fetch') {
-        return { 
-          error: 'Cannot connect to server. Please check your internet connection or contact support if the problem persists.' 
-        };
+        if (import.meta.env.DEV) {
+          return { 
+            error: 'Cannot connect to server. Please ensure the backend is running on localhost:5000.' 
+          };
+        } else {
+          return { 
+            error: 'Cannot connect to server. Please check if the reverse proxy is configured correctly.' 
+          };
+        }
       }
       
       return { error: 'Network error occurred' };

@@ -18,6 +18,7 @@ const BackendStatus: React.FC = () => {
         (import.meta.env.DEV ? 'http://localhost:5000/api' : '/api');
       
       console.log('Checking backend status at:', API_BASE_URL);
+      console.log('Environment:', import.meta.env.DEV ? 'development' : 'production');
       
       const response = await fetch(`${API_BASE_URL}/auth/verify`, {
         method: 'GET',
@@ -26,14 +27,19 @@ const BackendStatus: React.FC = () => {
         },
       });
 
+      console.log('Status check response:', response.status, response.statusText);
+
       if (response.status === 401) {
         // 401 means the endpoint exists but we're not authenticated, which is expected
         setStatus('connected');
+        console.log('Backend is accessible (401 response is expected)');
       } else if (response.ok) {
         setStatus('connected');
+        console.log('Backend is accessible (200 response)');
       } else {
         setStatus('disconnected');
         setError(`Server responded with status: ${response.status}`);
+        console.error('Backend check failed with status:', response.status);
       }
     } catch (error) {
       console.error('Backend status check failed:', error);
@@ -44,7 +50,7 @@ const BackendStatus: React.FC = () => {
           if (import.meta.env.DEV) {
             setError('Cannot connect to backend server. Please ensure it\'s running on localhost:5000');
           } else {
-            setError('Cannot connect to backend server. Please check your internet connection or contact support.');
+            setError('Cannot connect to backend server. Please check if the reverse proxy is configured correctly.');
           }
         } else {
           setError(error.message);
@@ -77,12 +83,16 @@ const BackendStatus: React.FC = () => {
         <AlertDescription className="text-red-700">
           <div className="space-y-2">
             <p>Backend server is not accessible: {error}</p>
-            {import.meta.env.DEV && (
+            {import.meta.env.DEV ? (
               <p className="text-sm">
                 Make sure the backend server is running. You can start it by running:
                 <code className="block bg-red-100 p-1 mt-1 rounded text-xs">
                   cd backend && npm start
                 </code>
+              </p>
+            ) : (
+              <p className="text-sm">
+                In production, ensure your reverse proxy is correctly forwarding /api/* requests to the backend server.
               </p>
             )}
             <Button 
