@@ -102,15 +102,21 @@ class ApiService {
       const url = `${API_BASE_URL}${endpoint}`;
       
       console.log(`Making request to: ${url}`);
-      console.log('Request options:', { ...options, body: options.body ? 'REQUEST_BODY_PRESENT' : 'NO_BODY' });
+      console.log('Request options:', { 
+        method: options.method || 'GET',
+        headers: shouldIncludeAuth ? this.getHeaders() : options.headers,
+        body: options.body ? 'REQUEST_BODY_PRESENT' : 'NO_BODY' 
+      });
       console.log('Environment:', import.meta.env.DEV ? 'development' : 'production');
       console.log('API Base URL:', API_BASE_URL);
+      console.log('Current window location:', window.location.href);
       
-      // Only show localhost warning in development mode
-      if (import.meta.env.DEV && API_BASE_URL.includes('localhost')) {
-        console.warn('Using localhost API - ensure backend is running on port 5000');
-      } else if (!import.meta.env.DEV) {
+      // Production-specific logging
+      if (!import.meta.env.DEV) {
         console.log('Production mode: using relative API paths for reverse proxy');
+        console.log('Full request URL will be:', window.location.origin + url);
+      } else if (API_BASE_URL.includes('localhost')) {
+        console.warn('Development mode: using localhost API - ensure backend is running on port 5000');
       }
 
       const response = await fetch(url, {
@@ -123,17 +129,43 @@ class ApiService {
 
       console.log(`Response status: ${response.status} ${response.statusText}`);
       console.log(`Response URL: ${response.url}`);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
 
-      const data = await response.json();
-      console.log(`Response from ${endpoint}:`, data);
+      // Log response body for debugging in production
+      const responseText = await response.text();
+      console.log(`Raw response from ${endpoint}:`, responseText);
+      
+      let data;
+      try {
+        data = responseText ? JSON.parse(responseText) : {};
+      } catch (parseError) {
+        console.error('Failed to parse response as JSON:', parseError);
+        console.error('Response text was:', responseText);
+        return { error: 'Invalid response format from server' };
+      }
 
       if (!response.ok) {
+        console.error(`HTTP Error ${response.status}:`, data);
+        
         // Handle validation errors from express-validator
         if (data.errors && Array.isArray(data.errors)) {
           const errorMessage = data.errors.map((err: any) => err.msg).join(', ');
           return { error: errorMessage };
         }
-        return { error: data.error || data.message || `HTTP ${response.status}: ${response.statusText}` };
+        
+        // Specific error handling for common HTTP status codes
+        switch (response.status) {
+          case 404:
+            return { error: `Endpoint not found: ${endpoint}. Please check if the backend is running and the reverse proxy is configured correctly.` };
+          case 500:
+            return { error: 'Internal server error. Please try again later.' };
+          case 502:
+            return { error: 'Bad gateway. The reverse proxy cannot reach the backend server.' };
+          case 503:
+            return { error: 'Service unavailable. The backend server may be down.' };
+          default:
+            return { error: data.error || data.message || `HTTP ${response.status}: ${response.statusText}` };
+        }
       }
 
       return data;
@@ -142,10 +174,12 @@ class ApiService {
       console.error('Full error details:', {
         message: error instanceof Error ? error.message : 'Unknown error',
         name: error instanceof Error ? error.name : 'Unknown',
-        stack: error instanceof Error ? error.stack : 'No stack trace'
+        stack: error instanceof Error ? error.stack : 'No stack trace',
+        url: `${API_BASE_URL}${endpoint}`,
+        environment: import.meta.env.DEV ? 'development' : 'production'
       });
       
-      // Provide more specific error messages
+      // Provide more specific error messages based on environment
       if (error instanceof TypeError && error.message === 'Failed to fetch') {
         if (import.meta.env.DEV) {
           return { 
@@ -153,12 +187,12 @@ class ApiService {
           };
         } else {
           return { 
-            error: 'Cannot connect to server. Please check if the reverse proxy is configured correctly.' 
+            error: `Cannot connect to server at ${API_BASE_URL}${endpoint}. Please check if the reverse proxy is configured correctly and the backend is running.` 
           };
         }
       }
       
-      return { error: 'Network error occurred' };
+      return { error: 'Network error occurred. Please check your connection and try again.' };
     }
   }
 
