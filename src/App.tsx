@@ -10,6 +10,11 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
+import DashboardNetwork from "./pages/DashboardNetwork";
+import DashboardDNS from "./pages/DashboardDNS";
+import DashboardEmail from "./pages/DashboardEmail";
+import DashboardSecurity from "./pages/DashboardSecurity";
+import DashboardMonitoring from "./pages/DashboardMonitoring";
 import Pricing from "./pages/Pricing";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
@@ -29,6 +34,11 @@ const App = () => (
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/dashboard/network" element={<DashboardNetwork />} />
+              <Route path="/dashboard/dns" element={<DashboardDNS />} />
+              <Route path="/dashboard/email" element={<DashboardEmail />} />
+              <Route path="/dashboard/security" element={<DashboardSecurity />} />
+              <Route path="/dashboard/monitoring" element={<DashboardMonitoring />} />
               <Route path="/pricing" element={<Pricing />} />
               <Route path="/admin" element={<Admin />} />
               {/* Tool routes - all render within Index layout */}
