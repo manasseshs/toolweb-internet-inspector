@@ -9,7 +9,8 @@
     "dev": "nodemon src/server.js",
     "migrate": "node src/scripts/migrate-from-supabase.js",
     "setup-db": "node src/scripts/setup-database.js",
-    "test-connection": "node src/scripts/test-connection.js"
+    "test-connection": "node src/scripts/test-connection.js",
+    "check-users": "node src/scripts/check-users-table.js"
   },
   "dependencies": {
     "express": "^4.18.2",
