@@ -10,7 +10,8 @@
     "migrate": "node src/scripts/migrate-from-supabase.js",
     "setup-db": "node src/scripts/setup-database.js",
     "test-connection": "node src/scripts/test-connection.js",
-    "check-users": "node src/scripts/check-users-table.js"
+    "check-users": "node src/scripts/check-users-table.js",
+    "create-admin": "node src/scripts/create-admin-user.js"
   },
   "dependencies": {
     "express": "^4.18.2",
