@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, CheckCircle, RefreshCw, Info } from 'lucide-react';
+import { AlertCircle, CheckCircle, RefreshCw } from 'lucide-react';
 
 const BackendStatus: React.FC = () => {
   const [status, setStatus] = useState<'checking' | 'connected' | 'disconnected'>('checking');
@@ -18,17 +18,13 @@ const BackendStatus: React.FC = () => {
     setError('');
 
     try {
-      // Use the same API base URL logic as the ApiService
-      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
-        (import.meta.env.DEV ? 'http://localhost:5000/api' : '/api');
-      
+      // Use simple relative path logic
+      const API_BASE_URL = import.meta.env.DEV ? 'http://localhost:5000/api' : '/api';
       const testUrl = `${API_BASE_URL}/auth/verify`;
-      const fullUrl = import.meta.env.DEV ? testUrl : `${window.location.origin}${testUrl}`;
       
       console.log('Checking backend status at:', testUrl);
-      console.log('Full URL will be:', fullUrl);
       console.log('Environment:', import.meta.env.DEV ? 'development' : 'production');
-      console.log('Window location:', window.location.href);
+      console.log('Current location:', window.location.href);
       
       setDiagnostics({
         url: testUrl,
@@ -58,14 +54,6 @@ const BackendStatus: React.FC = () => {
         const errorMsg = `HTTP ${response.status}: ${response.statusText}`;
         setError(errorMsg);
         console.error('Backend check failed with status:', response.status);
-        
-        // Additional logging for production debugging
-        if (!import.meta.env.DEV) {
-          console.error('Production backend check failed. Please verify:');
-          console.error('1. Backend is running on port 5000');
-          console.error('2. Reverse proxy is forwarding /api/* to localhost:5000/api/');
-          console.error('3. OpenLiteSpeed virtual host configuration is correct');
-        }
       }
     } catch (error) {
       console.error('Backend status check failed:', error);
@@ -76,7 +64,7 @@ const BackendStatus: React.FC = () => {
           if (import.meta.env.DEV) {
             setError('Cannot connect to backend server. Please ensure it\'s running on localhost:5000');
           } else {
-            setError('Cannot connect to backend server. Reverse proxy configuration issue or backend is down.');
+            setError('Cannot connect to backend server. Check reverse proxy configuration.');
           }
         } else {
           setError(error.message);
@@ -98,9 +86,9 @@ const BackendStatus: React.FC = () => {
         <AlertDescription className="text-green-700">
           <div className="space-y-1">
             <p>Backend server is connected and running properly.</p>
-            {diagnostics && !import.meta.env.DEV && (
+            {diagnostics && (
               <p className="text-xs text-green-600">
-                Production mode - API calls via reverse proxy at {diagnostics.url}
+                Environment: {diagnostics.environment} | API: {diagnostics.url}
               </p>
             )}
           </div>
@@ -122,26 +110,26 @@ const BackendStatus: React.FC = () => {
                 <p><strong>Diagnostics:</strong></p>
                 <p>URL: {diagnostics.url}</p>
                 <p>Environment: {diagnostics.environment}</p>
-                <p>Timestamp: {new Date(diagnostics.timestamp).toLocaleString()}</p>
+                <p>Time: {new Date(diagnostics.timestamp).toLocaleString()}</p>
               </div>
             )}
             
             {import.meta.env.DEV ? (
               <div className="text-sm">
-                <p>Development mode troubleshooting:</p>
-                <p>Make sure the backend server is running:</p>
+                <p>Development troubleshooting:</p>
+                <p>Ensure backend is running:</p>
                 <code className="block bg-red-100 p-1 mt-1 rounded text-xs">
                   cd backend && npm start
                 </code>
               </div>
             ) : (
               <div className="text-sm">
-                <p>Production mode troubleshooting:</p>
+                <p>Production troubleshooting:</p>
                 <ol className="list-decimal list-inside text-xs space-y-1">
-                  <li>Verify backend is running: <code>curl http://localhost:5000/api/auth/verify</code></li>
-                  <li>Check reverse proxy forwards /api/* to localhost:5000/api/</li>
-                  <li>Verify OpenLiteSpeed virtual host configuration</li>
-                  <li>Check firewall and port accessibility</li>
+                  <li>Check backend: <code>curl http://localhost:5000/api/auth/verify</code></li>
+                  <li>Verify reverse proxy forwards /api/* to localhost:5000/api/</li>
+                  <li>Check OpenLiteSpeed virtual host configuration</li>
+                  <li>Ensure firewall allows connections</li>
                 </ol>
               </div>
             )}

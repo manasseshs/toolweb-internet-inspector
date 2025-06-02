@@ -1,9 +1,24 @@
 
-# Netlify-style redirects for SPA routing
-# This file can also be used as reference for OpenLiteSpeed configuration
+# SPA routing redirects for ToolWeb.io
 
-# API routes should not be redirected
+# API routes should pass through to backend
 /api/* /api/:splat 200
 
-# All other routes should serve index.html for SPA
+# Static assets should not be redirected
+/*.js /:splat 200
+/*.css /:splat 200
+/*.png /:splat 200
+/*.jpg /:splat 200
+/*.jpeg /:splat 200
+/*.gif /:splat 200
+/*.ico /:splat 200
+/*.svg /:splat 200
+/*.woff /:splat 200
+/*.woff2 /:splat 200
+/*.ttf /:splat 200
+/*.eot /:splat 200
+/*.map /:splat 200
+/*.json /:splat 200
+
+# SPA routes - all other routes should serve index.html
 /* /index.html 200

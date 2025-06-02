@@ -1,22 +1,35 @@
 
-# Enable rewrite engine
+# OpenLiteSpeed SPA Configuration for ToolWeb.io
 RewriteEngine On
 
-# Handle client-side routing for SPA
-# If the requested file or directory doesn't exist, serve index.html
+# Handle CORS preflight requests
+RewriteCond %{REQUEST_METHOD} OPTIONS
+RewriteRule ^(.*)$ $1 [R=200,L]
+
+# API routes should not be rewritten - pass through to backend
+RewriteCond %{REQUEST_URI} ^/api/
+RewriteRule ^(.*)$ - [L]
+
+# Static assets should not be rewritten
+RewriteCond %{REQUEST_URI} \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|map)$ [NC]
+RewriteRule ^(.*)$ - [L]
+
+# SPA routing - redirect all other requests to index.html
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_URI} !^/api/
-RewriteRule . /index.html [L]
+RewriteRule ^(.*)$ /index.html [QSA,L]
 
 # Set proper MIME types
 <IfModule mod_mime.c>
     AddType application/javascript .js
+    AddType application/javascript .mjs
     AddType text/css .css
     AddType text/html .html
+    AddType application/json .json
 </IfModule>
 
-# Enable compression
+# Enable compression for better performance
 <IfModule mod_deflate.c>
     AddOutputFilterByType DEFLATE text/plain
     AddOutputFilterByType DEFLATE text/html
@@ -27,6 +40,7 @@ RewriteRule . /index.html [L]
     AddOutputFilterByType DEFLATE application/rss+xml
     AddOutputFilterByType DEFLATE application/javascript
     AddOutputFilterByType DEFLATE application/x-javascript
+    AddOutputFilterByType DEFLATE application/json
 </IfModule>
 
 # Cache static assets
@@ -39,4 +53,12 @@ RewriteRule . /index.html [L]
     ExpiresByType image/jpeg "access plus 1 year"
     ExpiresByType image/gif "access plus 1 year"
     ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType application/json "access plus 1 day"
+</IfModule>
+
+# Security headers
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options nosniff
+    Header always set X-Frame-Options DENY
+    Header always set X-XSS-Protection "1; mode=block"
 </IfModule>

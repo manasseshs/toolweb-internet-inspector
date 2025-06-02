@@ -1,7 +1,6 @@
 
-// Use relative path for production with reverse proxy, fallback to localhost for local development
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
-  (import.meta.env.DEV ? 'http://localhost:5000/api' : '/api');
+// Simple relative path for production, localhost for development
+const API_BASE_URL = import.meta.env.DEV ? 'http://localhost:5000/api' : '/api';
 
 interface ApiResponse<T = any> {
   data?: T;
@@ -102,23 +101,9 @@ class ApiService {
       const url = `${API_BASE_URL}${endpoint}`;
       
       console.log(`Making request to: ${url}`);
-      console.log('Request options:', { 
-        method: options.method || 'GET',
-        headers: shouldIncludeAuth ? this.getHeaders() : options.headers,
-        body: options.body ? 'REQUEST_BODY_PRESENT' : 'NO_BODY' 
-      });
       console.log('Environment:', import.meta.env.DEV ? 'development' : 'production');
       console.log('API Base URL:', API_BASE_URL);
-      console.log('Current window location:', window.location.href);
       
-      // Production-specific logging
-      if (!import.meta.env.DEV) {
-        console.log('Production mode: using relative API paths for reverse proxy');
-        console.log('Full request URL will be:', window.location.origin + url);
-      } else if (API_BASE_URL.includes('localhost')) {
-        console.warn('Development mode: using localhost API - ensure backend is running on port 5000');
-      }
-
       const response = await fetch(url, {
         ...options,
         headers: {
@@ -129,9 +114,8 @@ class ApiService {
 
       console.log(`Response status: ${response.status} ${response.statusText}`);
       console.log(`Response URL: ${response.url}`);
-      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
 
-      // Log response body for debugging in production
+      // Log response body for debugging
       const responseText = await response.text();
       console.log(`Raw response from ${endpoint}:`, responseText);
       
@@ -156,11 +140,11 @@ class ApiService {
         // Specific error handling for common HTTP status codes
         switch (response.status) {
           case 404:
-            return { error: `Endpoint not found: ${endpoint}. Please check if the backend is running and the reverse proxy is configured correctly.` };
+            return { error: `API endpoint not found: ${endpoint}. Please check if the backend is running and accessible.` };
           case 500:
             return { error: 'Internal server error. Please try again later.' };
           case 502:
-            return { error: 'Bad gateway. The reverse proxy cannot reach the backend server.' };
+            return { error: 'Bad gateway. The server cannot reach the backend.' };
           case 503:
             return { error: 'Service unavailable. The backend server may be down.' };
           default:
@@ -179,7 +163,7 @@ class ApiService {
         environment: import.meta.env.DEV ? 'development' : 'production'
       });
       
-      // Provide more specific error messages based on environment
+      // Provide more specific error messages based on error type
       if (error instanceof TypeError && error.message === 'Failed to fetch') {
         if (import.meta.env.DEV) {
           return { 
@@ -187,7 +171,7 @@ class ApiService {
           };
         } else {
           return { 
-            error: `Cannot connect to server at ${API_BASE_URL}${endpoint}. Please check if the reverse proxy is configured correctly and the backend is running.` 
+            error: `Cannot connect to API at ${API_BASE_URL}${endpoint}. Please check server configuration.` 
           };
         }
       }
