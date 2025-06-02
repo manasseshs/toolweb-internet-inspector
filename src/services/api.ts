@@ -6,6 +6,9 @@ interface ApiResponse<T = any> {
   error?: string;
   message?: string;
   errors?: Array<{ msg: string; field?: string }>;
+  // Add support for direct response properties
+  token?: string;
+  user?: any;
 }
 
 // Define specific response types
@@ -15,6 +18,7 @@ interface LoginResponse {
     id: string;
     email: string;
     plan?: string;
+    is_admin?: boolean;
   };
 }
 
@@ -67,6 +71,7 @@ interface UserResponse {
     id: string;
     email: string;
     plan?: string;
+    is_admin?: boolean;
   };
 }
 
@@ -93,6 +98,8 @@ class ApiService {
     try {
       const shouldIncludeAuth = !options.headers || !('Authorization' in options.headers);
       
+      console.log(`Making request to: ${API_BASE_URL}${endpoint}`);
+      
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         ...options,
         headers: {
@@ -102,12 +109,18 @@ class ApiService {
       });
 
       const data = await response.json();
+      console.log(`Response from ${endpoint}:`, data);
 
       if (!response.ok) {
-        return { error: data.error || 'Request failed' };
+        // Handle validation errors from express-validator
+        if (data.errors && Array.isArray(data.errors)) {
+          const errorMessage = data.errors.map((err: any) => err.msg).join(', ');
+          return { error: errorMessage };
+        }
+        return { error: data.error || data.message || 'Request failed' };
       }
 
-      return { data };
+      return data;
     } catch (error) {
       console.error('API request error:', error);
       return { error: 'Network error occurred' };
@@ -147,7 +160,6 @@ class ApiService {
     return this.makeRequest<VerificationHistoryResponse>(`/email/history?page=${page}&limit=${limit}`);
   }
 
-  // Subscription methods
   async createCheckoutSession(priceId: string, planName: string): Promise<ApiResponse<any>> {
     return this.makeRequest<any>('/subscription/create-checkout', {
       method: 'POST',

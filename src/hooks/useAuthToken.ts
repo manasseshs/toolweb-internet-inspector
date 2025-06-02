@@ -9,21 +9,33 @@ export const useAuthToken = () => {
   const verifyStoredToken = useCallback(async (): Promise<{ user: AuthUser | null; session: any | null }> => {
     const token = localStorage.getItem('auth_token');
     if (!token) {
+      console.log('No token found in localStorage');
       setLoading(false);
       return { user: null, session: null };
     }
 
     try {
+      console.log('Verifying stored token');
       const response = await apiService.verifyToken();
+      console.log('Token verification response:', response);
+      
       if (response.error) {
+        console.error('Token verification failed:', response.error);
         localStorage.removeItem('auth_token');
         setLoading(false);
         return { user: null, session: null };
-      } else if (response.data?.user) {
+      } 
+      
+      if (response.data?.user || response.user) {
+        const userData = response.data?.user || response.user;
         const authUser: AuthUser = {
-          ...response.data.user,
-          plan: 'free'
+          id: userData.id.toString(),
+          email: userData.email,
+          plan: userData.plan || 'free',
+          is_admin: userData.is_admin || false
         };
+        
+        console.log('Token verification successful, user:', authUser);
         setLoading(false);
         return { 
           user: authUser, 
