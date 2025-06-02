@@ -13,7 +13,9 @@ const BackendStatus: React.FC = () => {
     setError('');
 
     try {
-      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      // Use the same API base URL logic as the ApiService
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
+        (import.meta.env.DEV ? 'http://localhost:5000/api' : '/api');
       
       console.log('Checking backend status at:', API_BASE_URL);
       
@@ -39,7 +41,11 @@ const BackendStatus: React.FC = () => {
       
       if (error instanceof Error) {
         if (error.message === 'Failed to fetch') {
-          setError('Cannot connect to backend server. Please ensure it\'s running on localhost:5000');
+          if (import.meta.env.DEV) {
+            setError('Cannot connect to backend server. Please ensure it\'s running on localhost:5000');
+          } else {
+            setError('Cannot connect to backend server. Please check your internet connection or contact support.');
+          }
         } else {
           setError(error.message);
         }
@@ -71,12 +77,14 @@ const BackendStatus: React.FC = () => {
         <AlertDescription className="text-red-700">
           <div className="space-y-2">
             <p>Backend server is not accessible: {error}</p>
-            <p className="text-sm">
-              Make sure the backend server is running. You can start it by running:
-              <code className="block bg-red-100 p-1 mt-1 rounded text-xs">
-                cd backend && npm start
-              </code>
-            </p>
+            {import.meta.env.DEV && (
+              <p className="text-sm">
+                Make sure the backend server is running. You can start it by running:
+                <code className="block bg-red-100 p-1 mt-1 rounded text-xs">
+                  cd backend && npm start
+                </code>
+              </p>
+            )}
             <Button 
               size="sm" 
               variant="outline" 
