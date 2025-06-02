@@ -1,5 +1,6 @@
 
-const API_BASE_URL = 'http://localhost:5000/api';
+// Try to use environment variable first, fallback to localhost for development
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 interface ApiResponse<T = any> {
   data?: T;
@@ -97,16 +98,25 @@ class ApiService {
   ): Promise<ApiResponse<T>> {
     try {
       const shouldIncludeAuth = !options.headers || !('Authorization' in options.headers);
+      const url = `${API_BASE_URL}${endpoint}`;
       
-      console.log(`Making request to: ${API_BASE_URL}${endpoint}`);
+      console.log(`Making request to: ${url}`);
+      console.log('Request options:', { ...options, body: options.body ? 'REQUEST_BODY_PRESENT' : 'NO_BODY' });
       
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      // Check if the API base URL is reachable
+      if (API_BASE_URL.includes('localhost')) {
+        console.warn('Using localhost API - ensure backend is running on port 5000');
+      }
+
+      const response = await fetch(url, {
         ...options,
         headers: {
           ...this.getHeaders(shouldIncludeAuth),
           ...options.headers,
         },
       });
+
+      console.log(`Response status: ${response.status} ${response.statusText}`);
 
       const data = await response.json();
       console.log(`Response from ${endpoint}:`, data);
@@ -117,12 +127,25 @@ class ApiService {
           const errorMessage = data.errors.map((err: any) => err.msg).join(', ');
           return { error: errorMessage };
         }
-        return { error: data.error || data.message || 'Request failed' };
+        return { error: data.error || data.message || `HTTP ${response.status}: ${response.statusText}` };
       }
 
       return data;
     } catch (error) {
       console.error('API request error:', error);
+      console.error('Full error details:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        name: error instanceof Error ? error.name : 'Unknown',
+        stack: error instanceof Error ? error.stack : 'No stack trace'
+      });
+      
+      // Provide more specific error messages
+      if (error instanceof TypeError && error.message === 'Failed to fetch') {
+        return { 
+          error: 'Cannot connect to server. Please ensure the backend is running and accessible.' 
+        };
+      }
+      
       return { error: 'Network error occurred' };
     }
   }

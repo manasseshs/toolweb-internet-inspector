@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import BackendStatus from '@/components/BackendStatus';
 
 const Register = () => {
   const [email, setEmail] = useState('');
@@ -70,8 +71,18 @@ const Register = () => {
       
       let errorMessage = "An unexpected error occurred during registration. Please try again.";
       
-      if (error?.message?.includes('already registered')) {
-        errorMessage = "This email is already registered. Please try signing in instead.";
+      if (error?.message) {
+        if (error.message.includes('Cannot connect to server')) {
+          errorMessage = "Cannot connect to server. Please ensure the backend is running and try again.";
+        } else if (error.message.includes('already registered')) {
+          errorMessage = "This email is already registered. Please try signing in instead.";
+        } else if (error.message.includes('valid email')) {
+          errorMessage = "Please enter a valid email address.";
+        } else if (error.message.includes('6 characters')) {
+          errorMessage = "Password must be at least 6 characters long.";
+        } else {
+          errorMessage = error.message;
+        }
       }
       
       toast({
@@ -146,6 +157,8 @@ const Register = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            <BackendStatus />
+            
             <Alert className="mb-4 border-blue-200 bg-blue-50">
               <CheckCircle className="h-4 w-4 text-blue-600" />
               <AlertDescription className="text-blue-700">

@@ -37,10 +37,24 @@ export const useAuthOperations = () => {
         };
       }
 
-      console.error('Login failed: missing token or user data');
-      return { success: false, user: null, session: null };
+      console.error('Login failed: missing token or user data in response:', response);
+      throw new Error('Invalid response from server');
     } catch (error) {
       console.error('Login error:', error);
+      
+      // Provide more user-friendly error messages
+      if (error instanceof Error) {
+        if (error.message.includes('Cannot connect to server')) {
+          throw new Error('Cannot connect to server. Please ensure you have an internet connection and try again.');
+        }
+        if (error.message.includes('Email ou senha inválidos')) {
+          throw new Error('Invalid email or password');
+        }
+        if (error.message.includes('Conta desativada')) {
+          throw new Error('Account is disabled');
+        }
+      }
+      
       throw error;
     }
   }, []);
@@ -78,10 +92,27 @@ export const useAuthOperations = () => {
         };
       }
 
-      console.error('Registration failed: missing token or user data');
-      return { success: false, user: null, session: null };
+      console.error('Registration failed: missing token or user data in response:', response);
+      throw new Error('Invalid response from server');
     } catch (error) {
       console.error('Registration error:', error);
+      
+      // Provide more user-friendly error messages
+      if (error instanceof Error) {
+        if (error.message.includes('Cannot connect to server')) {
+          throw new Error('Cannot connect to server. Please ensure the backend is running and try again.');
+        }
+        if (error.message.includes('Email já está em uso')) {
+          throw new Error('This email is already registered. Please try signing in instead.');
+        }
+        if (error.message.includes('Email inválido')) {
+          throw new Error('Please enter a valid email address');
+        }
+        if (error.message.includes('Senha deve ter pelo menos')) {
+          throw new Error('Password must be at least 6 characters long');
+        }
+      }
+      
       throw error;
     }
   }, []);

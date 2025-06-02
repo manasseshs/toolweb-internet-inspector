@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Network, Mail, Lock, ArrowLeft, AlertCircle } from 'lucide-react';
@@ -8,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import BackendStatus from '@/components/BackendStatus';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -48,10 +50,16 @@ const Login = () => {
       
       let errorMessage = "An unexpected error occurred during login. Please try again.";
       
-      if (error?.message?.includes('Email not confirmed')) {
-        errorMessage = "Please check your email and click the confirmation link before signing in.";
-      } else if (error?.message?.includes('Invalid login credentials')) {
-        errorMessage = "Invalid email or password. Please check your credentials.";
+      if (error?.message) {
+        if (error.message.includes('Cannot connect to server')) {
+          errorMessage = "Cannot connect to server. Please ensure you have an internet connection and try again.";
+        } else if (error.message.includes('Invalid email or password')) {
+          errorMessage = "Invalid email or password. Please check your credentials.";
+        } else if (error.message.includes('Account is disabled')) {
+          errorMessage = "Your account has been disabled. Please contact support.";
+        } else {
+          errorMessage = error.message;
+        }
       }
       
       toast({
@@ -98,6 +106,8 @@ const Login = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            <BackendStatus />
+            
             <Alert className="mb-4 border-blue-200 bg-blue-50">
               <AlertCircle className="h-4 w-4 text-blue-600" />
               <AlertDescription className="text-blue-700">
