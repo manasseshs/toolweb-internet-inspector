@@ -2,15 +2,18 @@
 import React, { useState, useEffect } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, CheckCircle, RefreshCw } from 'lucide-react';
+import { AlertCircle, CheckCircle, RefreshCw, Info } from 'lucide-react';
 
 const BackendStatus: React.FC = () => {
   const [status, setStatus] = useState<'checking' | 'connected' | 'disconnected'>('checking');
   const [error, setError] = useState<string>('');
   const [diagnostics, setDiagnostics] = useState<{
     url: string;
+    directUrl?: string;
     environment: string;
     timestamp: string;
+    reverseProxyWorking?: boolean;
+    directBackendWorking?: boolean;
   } | null>(null);
 
   const checkBackendStatus = async () => {
@@ -26,11 +29,37 @@ const BackendStatus: React.FC = () => {
       console.log('Environment:', import.meta.env.DEV ? 'development' : 'production');
       console.log('Current location:', window.location.href);
       
-      setDiagnostics({
+      const diagnosticsData = {
         url: testUrl,
         environment: import.meta.env.DEV ? 'development' : 'production',
-        timestamp: new Date().toISOString()
-      });
+        timestamp: new Date().toISOString(),
+        reverseProxyWorking: false,
+        directBackendWorking: false
+      };
+
+      // In production, also test direct backend connection for debugging
+      if (!import.meta.env.DEV) {
+        const directUrl = `${window.location.protocol}//${window.location.hostname}:5000/api/auth/verify`;
+        diagnosticsData.directUrl = directUrl;
+        
+        try {
+          console.log('Testing direct backend connection:', directUrl);
+          const directResponse = await fetch(directUrl, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+          });
+          
+          console.log('Direct backend response:', directResponse.status);
+          if (directResponse.status === 401 || directResponse.ok) {
+            diagnosticsData.directBackendWorking = true;
+          }
+        } catch (directError) {
+          console.log('Direct backend test failed:', directError);
+          diagnosticsData.directBackendWorking = false;
+        }
+      }
+      
+      setDiagnostics(diagnosticsData);
       
       const response = await fetch(testUrl, {
         method: 'GET',
@@ -45,9 +74,13 @@ const BackendStatus: React.FC = () => {
       if (response.status === 401) {
         // 401 means the endpoint exists but we're not authenticated, which is expected
         setStatus('connected');
+        diagnosticsData.reverseProxyWorking = true;
+        setDiagnostics(diagnosticsData);
         console.log('Backend is accessible (401 response is expected)');
       } else if (response.ok) {
         setStatus('connected');
+        diagnosticsData.reverseProxyWorking = true;
+        setDiagnostics(diagnosticsData);
         console.log('Backend is accessible (200 response)');
       } else {
         setStatus('disconnected');
@@ -106,11 +139,19 @@ const BackendStatus: React.FC = () => {
             <p>Backend server is not accessible: {error}</p>
             
             {diagnostics && (
-              <div className="text-xs bg-red-100 p-2 rounded">
+              <div className="text-xs bg-red-100 p-2 rounded space-y-1">
                 <p><strong>Diagnostics:</strong></p>
                 <p>URL: {diagnostics.url}</p>
                 <p>Environment: {diagnostics.environment}</p>
                 <p>Time: {new Date(diagnostics.timestamp).toLocaleString()}</p>
+                
+                {!import.meta.env.DEV && diagnostics.directUrl && (
+                  <>
+                    <p>Direct Backend URL: {diagnostics.directUrl}</p>
+                    <p>Direct Backend Working: {diagnostics.directBackendWorking ? '✅ Yes' : '❌ No'}</p>
+                    <p>Reverse Proxy Working: {diagnostics.reverseProxyWorking ? '✅ Yes' : '❌ No'}</p>
+                  </>
+                )}
               </div>
             )}
             
@@ -123,14 +164,47 @@ const BackendStatus: React.FC = () => {
                 </code>
               </div>
             ) : (
-              <div className="text-sm">
+              <div className="text-sm space-y-2">
                 <p>Production troubleshooting:</p>
+                
+                {diagnostics?.directBackendWorking === false && (
+                  <Alert className="border-orange-200 bg-orange-50 p-2">
+                    <Info className="h-3 w-3 text-orange-600" />
+                    <AlertDescription className="text-orange-700 text-xs">
+                      <strong>Backend não está rodando:</strong> O servidor backend em localhost:5000 não está acessível.
+                      Execute: <code>cd backend && npm start</code>
+                    </AlertDescription>
+                  </Alert>
+                )}
+                
+                {diagnostics?.directBackendWorking === true && diagnostics?.reverseProxyWorking === false && (
+                  <Alert className="border-orange-200 bg-orange-50 p-2">
+                    <Info className="h-3 w-3 text-orange-600" />
+                    <AlertDescription className="text-orange-700 text-xs">
+                      <strong>Problema no Reverse Proxy:</strong> Backend está rodando mas o proxy /api/* não está funcionando.
+                      Verifique a configuração do OpenLiteSpeed.
+                    </AlertDescription>
+                  </Alert>
+                )}
+                
                 <ol className="list-decimal list-inside text-xs space-y-1">
                   <li>Check backend: <code>curl http://localhost:5000/api/auth/verify</code></li>
+                  <li>Test direct access: <code>curl {window.location.protocol}//{window.location.hostname}:5000/api/auth/verify</code></li>
                   <li>Verify reverse proxy forwards /api/* to localhost:5000/api/</li>
                   <li>Check OpenLiteSpeed virtual host configuration</li>
                   <li>Ensure firewall allows connections</li>
+                  <li>Check if port 5000 is open: <code>netstat -tlnp | grep :5000</code></li>
                 </ol>
+                
+                <div className="mt-2 p-2 bg-blue-50 rounded text-xs">
+                  <strong>OpenLiteSpeed Configuration:</strong>
+                  <p>Add this to your Virtual Host → Script Handler:</p>
+                  <code className="block mt-1 p-1 bg-white rounded">
+                    Suffixes: api<br/>
+                    Type: Proxy<br/>
+                    URI: http://localhost:5000/
+                  </code>
+                </div>
               </div>
             )}
             

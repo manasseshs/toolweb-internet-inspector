@@ -6,12 +6,16 @@ RewriteEngine On
 RewriteCond %{REQUEST_METHOD} OPTIONS
 RewriteRule ^(.*)$ $1 [R=200,L]
 
-# API routes should not be rewritten - pass through to backend
+# API routes should be proxied to backend - IMPORTANT: This must be configured in OpenLiteSpeed Virtual Host
+# Add Script Handler in OpenLiteSpeed:
+# Suffixes: api
+# Type: Proxy  
+# URI: http://localhost:5000/
 RewriteCond %{REQUEST_URI} ^/api/
-RewriteRule ^(.*)$ - [L]
+RewriteRule ^api/(.*)$ http://localhost:5000/api/$1 [P,L]
 
 # Static assets should not be rewritten
-RewriteCond %{REQUEST_URI} \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|map)$ [NC]
+RewriteCond %{REQUEST_URI} \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|map|json)$ [NC]
 RewriteRule ^(.*)$ - [L]
 
 # SPA routing - redirect all other requests to index.html
@@ -61,4 +65,9 @@ RewriteRule ^(.*)$ /index.html [QSA,L]
     Header always set X-Content-Type-Options nosniff
     Header always set X-Frame-Options DENY
     Header always set X-XSS-Protection "1; mode=block"
+    
+    # CORS headers for API requests
+    Header always set Access-Control-Allow-Origin "*"
+    Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+    Header always set Access-Control-Allow-Headers "Content-Type, Authorization"
 </IfModule>
