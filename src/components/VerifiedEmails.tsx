@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Download, Search, CheckCircle, XCircle, AlertCircle, RefreshCw, HelpCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { apiService } from '@/services/api';
 import EmailVerificationDownload from './email/EmailVerificationDownload';
 
 interface VerificationRecord {
@@ -35,15 +35,14 @@ const VerifiedEmails: React.FC = () => {
 
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('email_verifications')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+      const response = await apiService.getVerificationHistory();
 
-      if (error) throw error;
-      setVerifications(data || []);
-      setFilteredVerifications(data || []);
+      if (response.error) {
+        throw new Error(response.error);
+      }
+
+      setVerifications(response.data?.verifications || []);
+      setFilteredVerifications(response.data?.verifications || []);
     } catch (error) {
       console.error('Error fetching verifications:', error);
     } finally {

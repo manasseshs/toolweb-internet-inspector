@@ -2,10 +2,21 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { enhancedEmailVerification, VerificationResult } from '@/utils/emailVerificationEngine';
+import { apiService } from '@/services/api';
 import EmailVerificationForm from './email/EmailVerificationForm';
 import EmailVerificationResults from './email/EmailVerificationResults';
+
+interface VerificationResult {
+  email: string;
+  status: string;
+  confidence: number;
+  provider?: string;
+  smtp_server?: string;
+  smtp_response_code?: string;
+  smtp_response_message?: string;
+  verification_attempts?: number;
+  details?: any;
+}
 
 const EmailVerification: React.FC = () => {
   const [emailList, setEmailList] = useState('');
@@ -44,45 +55,30 @@ const EmailVerification: React.FC = () => {
     setResults([]);
 
     try {
-      const verificationResults: VerificationResult[] = [];
+      console.log(`Starting verification for ${emails.length} emails`);
+      setProgress(50);
+
+      const response = await apiService.verifyEmails(emails);
       
-      for (let i = 0; i < emails.length; i++) {
-        const email = emails[i].trim();
-        setProgress((i / emails.length) * 100);
-
-        console.log(`Starting verification for: ${email}`);
-        const result = await enhancedEmailVerification(email);
-        verificationResults.push(result);
-
-        // Store result in database
-        await supabase.from('email_verifications').insert({
-          user_id: user?.id,
-          email_address: email,
-          status: result.status,
-          smtp_server: result.smtp_server,
-          smtp_response_code: result.smtp_response_code,
-          smtp_response_message: result.smtp_response_message,
-          verification_details: {
-            ...result.details,
-            confidence: result.confidence,
-            provider: result.provider,
-            verification_attempts: result.verification_attempts
-          }
-        });
+      if (response.error) {
+        throw new Error(response.error);
       }
 
-      setResults(verificationResults);
+      if (response.data?.results) {
+        setResults(response.data.results);
+      }
+
       setProgress(100);
       
       toast({
         title: "Verification complete",
-        description: `Verified ${emails.length} email addresses with enhanced provider detection.`,
+        description: `Verified ${emails.length} email addresses.`,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Verification error:', error);
       toast({
         title: "Verification failed",
-        description: "An error occurred during email verification.",
+        description: error.message || "An error occurred during email verification.",
         variant: "destructive",
       });
     } finally {
@@ -104,7 +100,7 @@ const EmailVerification: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `email-verification-enhanced-${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `email-verification-${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };

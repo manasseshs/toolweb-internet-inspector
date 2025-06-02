@@ -1,19 +1,21 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
+import { apiService } from '@/services/api';
 
-interface AuthUser extends User {
+interface AuthUser {
+  id: string;
+  email: string;
   plan?: 'free' | 'pro' | 'enterprise';
   planExpiry?: string;
   subscribed?: boolean;
   subscription_tier?: string;
   subscription_end?: string;
+  is_admin?: boolean;
 }
 
 interface AuthContextType {
   user: AuthUser | null;
-  session: Session | null;
+  session: any | null;
   login: (email: string, password: string) => Promise<boolean>;
   register: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
@@ -38,29 +40,24 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
+  const [session, setSession] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
   const checkSubscription = async () => {
-    if (!session) return;
+    if (!user) return;
     
     try {
-      const { data, error } = await supabase.functions.invoke('check-subscription', {
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
-      });
+      const response = await apiService.checkSubscription();
 
-      if (error) {
-        console.error('Error checking subscription:', error);
+      if (response.error) {
+        console.error('Error checking subscription:', response.error);
         return;
       }
 
-      if (user && data) {
-        // Ensure proper type casting for plan
+      if (user && response.data) {
         let plan: 'free' | 'pro' | 'enterprise' = 'free';
-        if (data.subscribed && data.subscription_tier) {
-          switch (data.subscription_tier.toLowerCase()) {
+        if (response.data.subscribed && response.data.subscription_tier) {
+          switch (response.data.subscription_tier.toLowerCase()) {
             case 'pro':
               plan = 'pro';
               break;
@@ -75,9 +72,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
         const updatedUser: AuthUser = {
           ...user,
-          subscribed: data.subscribed,
-          subscription_tier: data.subscription_tier,
-          subscription_end: data.subscription_end,
+          subscribed: response.data.subscribed,
+          subscription_tier: response.data.subscription_tier,
+          subscription_end: response.data.subscription_end,
           plan
         };
         setUser(updatedUser);
@@ -87,65 +84,74 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  useEffect(() => {
-    // Set up auth state listener first
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state changed:', event, session);
-        setSession(session);
-        if (session?.user) {
-          const authUser: AuthUser = {
-            ...session.user,
-            plan: 'free'
-          };
-          setUser(authUser);
-          
-          // Check subscription status after login
-          if (event === 'SIGNED_IN') {
-            setTimeout(() => {
-              checkSubscription();
-            }, 1000);
-          }
-        } else {
-          setUser(null);
-        }
-        setLoading(false);
-      }
-    );
+  const verifyStoredToken = async () => {
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
+      setLoading(false);
+      return;
+    }
 
-    // Then check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (session?.user) {
+    try {
+      const response = await apiService.verifyToken();
+      if (response.error) {
+        localStorage.removeItem('auth_token');
+        setUser(null);
+        setSession(null);
+      } else if (response.data?.user) {
         const authUser: AuthUser = {
-          ...session.user,
+          ...response.data.user,
           plan: 'free'
         };
         setUser(authUser);
-        // Check subscription for existing session
+        setSession({ access_token: token });
+        
+        // Check subscription after setting user
         setTimeout(() => {
           checkSubscription();
         }, 1000);
       }
+    } catch (error) {
+      console.error('Error verifying token:', error);
+      localStorage.removeItem('auth_token');
+      setUser(null);
+      setSession(null);
+    } finally {
       setLoading(false);
-    });
+    }
+  };
 
-    return () => subscription.unsubscribe();
+  useEffect(() => {
+    verifyStoredToken();
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      const response = await apiService.login(email, password);
 
-      if (error) {
-        console.error('Login error:', error.message);
-        throw error;
+      if (response.error) {
+        console.error('Login error:', response.error);
+        throw new Error(response.error);
       }
 
-      return true;
+      if (response.data?.token && response.data?.user) {
+        localStorage.setItem('auth_token', response.data.token);
+        
+        const authUser: AuthUser = {
+          ...response.data.user,
+          plan: 'free'
+        };
+        setUser(authUser);
+        setSession({ access_token: response.data.token });
+
+        // Check subscription after login
+        setTimeout(() => {
+          checkSubscription();
+        }, 1000);
+
+        return true;
+      }
+
+      return false;
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -154,17 +160,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const register = async (email: string, password: string): Promise<boolean> => {
     try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-      });
+      const response = await apiService.register(email, password);
 
-      if (error) {
-        console.error('Registration error:', error.message);
-        throw error;
+      if (response.error) {
+        console.error('Registration error:', response.error);
+        throw new Error(response.error);
       }
 
-      return true;
+      if (response.data?.token && response.data?.user) {
+        localStorage.setItem('auth_token', response.data.token);
+        
+        const authUser: AuthUser = {
+          ...response.data.user,
+          plan: 'free'
+        };
+        setUser(authUser);
+        setSession({ access_token: response.data.token });
+
+        return true;
+      }
+
+      return false;
     } catch (error) {
       console.error('Registration error:', error);
       throw error;
@@ -173,10 +189,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = async (): Promise<void> => {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error('Logout error:', error.message);
-      }
+      localStorage.removeItem('auth_token');
+      setUser(null);
+      setSession(null);
     } catch (error) {
       console.error('Logout error:', error);
     }

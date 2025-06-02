@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { apiService } from '@/services/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -45,18 +45,14 @@ const SubscriptionManager = () => {
 
     setPortalLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('customer-portal', {
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
-      });
+      const response = await apiService.createCustomerPortal();
 
-      if (error) {
-        throw error;
+      if (response.error) {
+        throw new Error(response.error);
       }
 
-      if (data?.url) {
-        window.open(data.url, '_blank');
+      if (response.data?.url) {
+        window.open(response.data.url, '_blank');
         toast({
           title: "Opening customer portal",
           description: "Redirecting to Stripe customer portal...",
