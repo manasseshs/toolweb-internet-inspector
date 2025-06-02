@@ -8,6 +8,68 @@ interface ApiResponse<T = any> {
   errors?: Array<{ msg: string; field?: string }>;
 }
 
+// Define specific response types
+interface LoginResponse {
+  token: string;
+  user: {
+    id: string;
+    email: string;
+    plan?: string;
+  };
+}
+
+interface VerifyEmailsResponse {
+  results: Array<{
+    email: string;
+    status: string;
+    confidence: number;
+    provider?: string;
+    smtp_server?: string;
+    smtp_response_code?: string;
+    smtp_response_message?: string;
+    verification_attempts?: number;
+    details?: any;
+  }>;
+}
+
+interface VerificationHistoryResponse {
+  verifications: Array<{
+    id: string;
+    email_address: string;
+    status: string;
+    smtp_server?: string;
+    smtp_response_code?: string;
+    smtp_response_message?: string;
+    verification_details?: any;
+    verification_attempts?: number;
+    created_at: string;
+  }>;
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+  };
+}
+
+interface SubscriptionResponse {
+  subscribed: boolean;
+  subscription_tier?: string;
+  subscription_end?: string;
+}
+
+interface CustomerPortalResponse {
+  url: string;
+}
+
+interface UserResponse {
+  user: {
+    id: string;
+    email: string;
+    plan?: string;
+  };
+}
+
 class ApiService {
   private getHeaders(includeAuth: boolean = true): Record<string, string> {
     const headers: Record<string, string> = {
@@ -17,7 +79,7 @@ class ApiService {
     if (includeAuth) {
       const token = localStorage.getItem('auth_token');
       if (token) {
-        headers.Authorization = `Bearer ${token}`;
+        headers['Authorization'] = `Bearer ${token}`;
       }
     }
 
@@ -29,10 +91,12 @@ class ApiService {
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
     try {
+      const shouldIncludeAuth = !options.headers || !('Authorization' in options.headers);
+      
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         ...options,
         headers: {
-          ...this.getHeaders(options.headers?.Authorization !== undefined),
+          ...this.getHeaders(shouldIncludeAuth),
           ...options.headers,
         },
       });
@@ -51,52 +115,52 @@ class ApiService {
   }
 
   // Auth methods
-  async login(email: string, password: string) {
-    return this.makeRequest('/auth/login', {
+  async login(email: string, password: string): Promise<ApiResponse<LoginResponse>> {
+    return this.makeRequest<LoginResponse>('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
-      headers: { Authorization: undefined },
+      headers: { 'Authorization': '' },
     });
   }
 
-  async register(email: string, password: string) {
-    return this.makeRequest('/auth/register', {
+  async register(email: string, password: string): Promise<ApiResponse<LoginResponse>> {
+    return this.makeRequest<LoginResponse>('/auth/register', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
-      headers: { Authorization: undefined },
+      headers: { 'Authorization': '' },
     });
   }
 
-  async verifyToken() {
-    return this.makeRequest('/auth/verify');
+  async verifyToken(): Promise<ApiResponse<UserResponse>> {
+    return this.makeRequest<UserResponse>('/auth/verify');
   }
 
   // Email verification methods
-  async verifyEmails(emails: string[]) {
-    return this.makeRequest('/email/verify', {
+  async verifyEmails(emails: string[]): Promise<ApiResponse<VerifyEmailsResponse>> {
+    return this.makeRequest<VerifyEmailsResponse>('/email/verify', {
       method: 'POST',
       body: JSON.stringify({ emails }),
     });
   }
 
-  async getVerificationHistory(page: number = 1, limit: number = 50) {
-    return this.makeRequest(`/email/history?page=${page}&limit=${limit}`);
+  async getVerificationHistory(page: number = 1, limit: number = 50): Promise<ApiResponse<VerificationHistoryResponse>> {
+    return this.makeRequest<VerificationHistoryResponse>(`/email/history?page=${page}&limit=${limit}`);
   }
 
   // Subscription methods
-  async createCheckoutSession(priceId: string, planName: string) {
-    return this.makeRequest('/subscription/create-checkout', {
+  async createCheckoutSession(priceId: string, planName: string): Promise<ApiResponse<any>> {
+    return this.makeRequest<any>('/subscription/create-checkout', {
       method: 'POST',
       body: JSON.stringify({ priceId, planName }),
     });
   }
 
-  async checkSubscription() {
-    return this.makeRequest('/subscription/status');
+  async checkSubscription(): Promise<ApiResponse<SubscriptionResponse>> {
+    return this.makeRequest<SubscriptionResponse>('/subscription/status');
   }
 
-  async createCustomerPortal() {
-    return this.makeRequest('/subscription/customer-portal', {
+  async createCustomerPortal(): Promise<ApiResponse<CustomerPortalResponse>> {
+    return this.makeRequest<CustomerPortalResponse>('/subscription/customer-portal', {
       method: 'POST',
     });
   }

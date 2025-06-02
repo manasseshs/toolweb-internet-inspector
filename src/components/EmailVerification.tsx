@@ -6,6 +6,7 @@ import { apiService } from '@/services/api';
 import EmailVerificationForm from './email/EmailVerificationForm';
 import EmailVerificationResults from './email/EmailVerificationResults';
 
+// Define our own VerificationResult interface that matches the API response
 interface VerificationResult {
   email: string;
   status: string;

@@ -4,7 +4,18 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, XCircle, AlertCircle, HelpCircle, Download } from 'lucide-react';
-import { VerificationResult } from '@/utils/emailVerificationEngine';
+
+interface VerificationResult {
+  email: string;
+  status: string;
+  confidence: number;
+  provider?: string;
+  smtp_server?: string;
+  smtp_response_code?: string;
+  smtp_response_message?: string;
+  verification_attempts?: number;
+  details?: any;
+}
 
 interface EmailVerificationResultsProps {
   results: VerificationResult[];
@@ -27,10 +38,10 @@ const EmailVerificationResults: React.FC<EmailVerificationResultsProps> = ({
     }
   };
 
-  const getStatusColor = (status: string, confidence: string) => {
+  const getStatusColor = (status: string, confidence: number) => {
     switch (status) {
       case 'valid': 
-        return confidence === 'high' ? 'bg-green-100 text-green-800' : 'bg-green-50 text-green-600';
+        return confidence > 80 ? 'bg-green-100 text-green-800' : 'bg-green-50 text-green-600';
       case 'invalid': return 'bg-red-100 text-red-800';
       case 'unconfirmed': return 'bg-orange-100 text-orange-800';
       case 'suspicious': return 'bg-yellow-100 text-yellow-800';
@@ -40,13 +51,16 @@ const EmailVerificationResults: React.FC<EmailVerificationResultsProps> = ({
     }
   };
 
-  const getConfidenceColor = (confidence: string) => {
-    switch (confidence) {
-      case 'high': return 'bg-blue-100 text-blue-800';
-      case 'medium': return 'bg-yellow-100 text-yellow-800';
-      case 'low': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
+  const getConfidenceColor = (confidence: number) => {
+    if (confidence > 80) return 'bg-blue-100 text-blue-800';
+    if (confidence > 50) return 'bg-yellow-100 text-yellow-800';
+    return 'bg-red-100 text-red-800';
+  };
+
+  const getConfidenceLevel = (confidence: number) => {
+    if (confidence > 80) return 'high';
+    if (confidence > 50) return 'medium';
+    return 'low';
   };
 
   if (results.length === 0) {
@@ -89,7 +103,7 @@ const EmailVerificationResults: React.FC<EmailVerificationResultsProps> = ({
                   {result.status}
                 </Badge>
                 <Badge variant="outline" className={getConfidenceColor(result.confidence)}>
-                  {result.confidence}
+                  {getConfidenceLevel(result.confidence)}
                 </Badge>
                 {result.smtp_response_code && (
                   <span className="text-xs text-gray-500">
