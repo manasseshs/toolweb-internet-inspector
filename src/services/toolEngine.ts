@@ -1,4 +1,3 @@
-
 import { ToolConfig } from '@/config/toolsConfig';
 import { apiService } from './api';
 
@@ -81,11 +80,20 @@ class ToolEngine {
         case 'smtp-test':
           result = await this.simulateSMTPTest(options.input);
           break;
+        case 'email-validation':
+          result = await this.simulateEmailValidation(options.input);
+          break;
+        case 'email-deliverability':
+          result = await this.simulateEmailDeliverability(options.input);
+          break;
         case 'spf-generator':
           result = await this.simulateSPFGenerator(options.input);
           break;
         case 'header-analyzer':
           result = await this.simulateHeaderAnalyzer(options.input);
+          break;
+        case 'email-migration':
+          result = await this.simulateEmailMigration(options.input);
           break;
         case 'https-test':
           result = await this.simulateHTTPSTest(options.input);
@@ -127,7 +135,6 @@ class ToolEngine {
     };
   }
 
-  // Simulation methods for different tools
   private async simulateBlacklistCheck(input: string) {
     await this.delay(1500);
     const isBlacklisted = Math.random() < 0.1;
@@ -365,6 +372,53 @@ class ToolEngine {
     };
   }
 
+  private async simulateEmailValidation(input: string) {
+    await this.delay(800);
+    const isValid = input.includes('@') && input.includes('.');
+    return {
+      email: input,
+      valid: isValid,
+      syntax_check: isValid ? 'PASS' : 'FAIL',
+      domain_check: isValid ? 'PASS' : 'FAIL',
+      mx_check: isValid ? 'PASS' : 'FAIL',
+      deliverable: isValid ? 'YES' : 'NO',
+      risk_score: isValid ? Math.floor(Math.random() * 20) : 80 + Math.floor(Math.random() * 20)
+    };
+  }
+
+  private async simulateEmailDeliverability(input: string) {
+    await this.delay(1500);
+    return {
+      domain: input,
+      spf_record: `v=spf1 include:_spf.${input} ~all`,
+      spf_valid: true,
+      dkim_configured: true,
+      dmarc_policy: 'quarantine',
+      deliverability_score: 85 + Math.floor(Math.random() * 15),
+      recommendations: [
+        'SPF record is properly configured',
+        'DKIM signing is active',
+        'Consider upgrading DMARC policy to reject'
+      ]
+    };
+  }
+
+  private async simulateEmailMigration(input: string) {
+    await this.delay(2000);
+    return {
+      status: 'CONFIGURED',
+      source_folders: ['INBOX', 'Sent', 'Drafts', 'Spam'],
+      estimated_emails: Math.floor(Math.random() * 5000) + 1000,
+      estimated_size: `${(Math.random() * 2 + 0.5).toFixed(1)} GB`,
+      migration_id: `mig_${Date.now()}`,
+      next_steps: [
+        'Review folder mapping',
+        'Start migration process',
+        'Monitor progress'
+      ]
+    };
+  }
+
   private async simulateHeaderAnalyzer(input: string) {
     await this.delay(1200);
     return {
@@ -418,7 +472,6 @@ class ToolEngine {
     };
   }
 
-  // Helper methods
   private delay(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
   }

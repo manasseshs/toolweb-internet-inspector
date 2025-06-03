@@ -3,7 +3,7 @@ import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
-import ToolCategoryPage from '@/components/dashboard/ToolCategoryPage';
+import ToolCategoryTabs from '@/components/dashboard/ToolCategoryTabs';
 import { getToolsByCategory } from '@/config/toolsConfig';
 
 const DashboardDNS = () => {
@@ -32,7 +32,7 @@ const DashboardDNS = () => {
 
   return (
     <DashboardLayout>
-      <ToolCategoryPage
+      <ToolCategoryTabs
         category="dns"
         title="DNS Tools"
         description="DNS records lookup, analysis, and domain management"

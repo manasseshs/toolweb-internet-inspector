@@ -4,432 +4,326 @@ export interface ToolConfig {
   name: string;
   description: string;
   category: 'network' | 'dns' | 'email' | 'security' | 'monitoring';
-  icon: string;
   inputType: string;
   inputPlaceholder: string;
+  features: string[];
   free: boolean;
-  requiresAuth: boolean;
-  planRequired?: 'free' | 'pro' | 'enterprise';
   dailyLimit?: {
     free: number;
     pro: number;
     enterprise: number;
   };
-  features: string[];
-  endpoint?: string;
   monitor?: boolean;
 }
 
-export const TOOLS_CONFIG: Record<string, ToolConfig> = {
+const tools: ToolConfig[] = [
   // Network Tools
-  'blacklist-check': {
+  {
     id: 'blacklist-check',
     name: 'Blacklist Check',
-    description: 'Check if IP address is listed on spam blacklists',
+    description: 'Check if an IP address is listed on spam blacklists',
     category: 'network',
-    icon: 'Shield',
     inputType: 'IP address',
-    inputPlaceholder: '192.168.1.1',
+    inputPlaceholder: 'Enter IP address (e.g., 8.8.8.8)',
+    features: ['Spam blacklist check', 'Reputation scoring', 'Multiple databases'],
     free: true,
-    requiresAuth: false,
-    dailyLimit: { free: 50, pro: 1000, enterprise: -1 },
-    features: ['Multiple blacklist databases', 'Detailed reputation score', 'Historical tracking'],
-    endpoint: '/api/tools/blacklist-check',
-    monitor: true
+    dailyLimit: { free: 50, pro: 500, enterprise: -1 }
   },
-  'ptr-lookup': {
+  {
     id: 'ptr-lookup',
     name: 'PTR Lookup',
-    description: 'Reverse DNS lookup for IP addresses',
+    description: 'Reverse DNS lookup to find hostname from IP',
     category: 'network',
-    icon: 'Network',
     inputType: 'IP address',
-    inputPlaceholder: '8.8.8.8',
+    inputPlaceholder: 'Enter IP address (e.g., 8.8.8.8)',
+    features: ['Reverse DNS', 'Hostname resolution', 'Fast lookup'],
     free: true,
-    requiresAuth: false,
-    dailyLimit: { free: 100, pro: 2000, enterprise: -1 },
-    features: ['Reverse DNS resolution', 'PTR record validation', 'Bulk lookup support'],
-    endpoint: '/api/tools/ptr-lookup'
+    dailyLimit: { free: 100, pro: 1000, enterprise: -1 }
   },
-  'arin-lookup': {
+  {
     id: 'arin-lookup',
     name: 'ARIN Lookup',
-    description: 'Get ASN, country and ISP information',
+    description: 'Get ASN, country, and provider information for IP',
     category: 'network',
-    icon: 'Globe',
     inputType: 'IP address',
-    inputPlaceholder: '8.8.8.8',
+    inputPlaceholder: 'Enter IP address (e.g., 8.8.8.8)',
+    features: ['ASN lookup', 'Geolocation', 'Provider info'],
     free: true,
-    requiresAuth: false,
-    dailyLimit: { free: 100, pro: 2000, enterprise: -1 },
-    features: ['ASN information', 'Geolocation data', 'ISP details'],
-    endpoint: '/api/tools/arin-lookup'
+    dailyLimit: { free: 75, pro: 750, enterprise: -1 }
   },
-  'tcp-port-test': {
+  {
     id: 'tcp-port-test',
     name: 'TCP Port Test',
-    description: 'Check if TCP ports are open and accessible',
+    description: 'Test if a TCP port is open on a host',
     category: 'network',
-    icon: 'Server',
-    inputType: 'IP/Domain:Port',
-    inputPlaceholder: 'google.com:80',
+    inputType: 'Host:Port',
+    inputPlaceholder: 'Enter host:port (e.g., google.com:80)',
+    features: ['Port connectivity', 'Service detection', 'Response time'],
     free: true,
-    requiresAuth: false,
-    dailyLimit: { free: 50, pro: 1000, enterprise: -1 },
-    features: ['Port connectivity test', 'Response time measurement', 'Multiple port scanning'],
-    endpoint: '/api/tools/tcp-port-test',
-    monitor: true
+    dailyLimit: { free: 25, pro: 250, enterprise: -1 }
   },
-  'ping-test': {
+  {
     id: 'ping-test',
     name: 'Ping Test',
-    description: 'ICMP ping test for latency measurement',
+    description: 'ICMP ping test to measure latency and packet loss',
     category: 'network',
-    icon: 'Zap',
-    inputType: 'IP address or domain',
-    inputPlaceholder: 'google.com',
+    inputType: 'Host or IP',
+    inputPlaceholder: 'Enter hostname or IP (e.g., google.com)',
+    features: ['Latency measurement', 'Packet loss detection', 'Multiple packets'],
     free: true,
-    requiresAuth: false,
-    dailyLimit: { free: 100, pro: 2000, enterprise: -1 },
-    features: ['Latency measurement', 'Packet loss detection', 'Continuous monitoring'],
-    endpoint: '/api/tools/ping-test',
-    monitor: true
+    dailyLimit: { free: 50, pro: 500, enterprise: -1 }
   },
-  'traceroute': {
+  {
     id: 'traceroute',
     name: 'Traceroute',
-    description: 'Network path tracing and hop analysis',
+    description: 'Trace network path to destination',
     category: 'network',
-    icon: 'Network',
-    inputType: 'IP address or domain',
-    inputPlaceholder: 'google.com',
+    inputType: 'Host or IP',
+    inputPlaceholder: 'Enter hostname or IP (e.g., google.com)',
+    features: ['Network path tracing', 'Hop analysis', 'Latency per hop'],
     free: true,
-    requiresAuth: false,
-    dailyLimit: { free: 20, pro: 500, enterprise: -1 },
-    features: ['Network path visualization', 'Hop latency analysis', 'Route optimization'],
-    endpoint: '/api/tools/traceroute'
+    dailyLimit: { free: 25, pro: 250, enterprise: -1 }
   },
-  'geoip-lookup': {
+  {
     id: 'geoip-lookup',
     name: 'GeoIP Lookup',
-    description: 'Geographic location lookup for IP addresses',
+    description: 'Get geographic location of an IP address',
     category: 'network',
-    icon: 'Globe',
     inputType: 'IP address',
-    inputPlaceholder: '8.8.8.8',
+    inputPlaceholder: 'Enter IP address (e.g., 8.8.8.8)',
+    features: ['Geographic location', 'ISP information', 'Timezone data'],
     free: true,
-    requiresAuth: false,
-    dailyLimit: { free: 100, pro: 2000, enterprise: -1 },
-    features: ['Country and city location', 'ISP information', 'Timezone data'],
-    endpoint: '/api/tools/geoip-lookup'
+    dailyLimit: { free: 100, pro: 1000, enterprise: -1 }
   },
 
   // DNS Tools
-  'a-record': {
+  {
     id: 'a-record',
     name: 'A Record Lookup',
-    description: 'Get IPv4 addresses for domain names',
+    description: 'Get A records (IPv4 addresses) for a domain',
     category: 'dns',
-    icon: 'Globe',
     inputType: 'Domain name',
-    inputPlaceholder: 'example.com',
+    inputPlaceholder: 'Enter domain (e.g., example.com)',
+    features: ['IPv4 addresses', 'TTL values', 'Multiple records'],
     free: true,
-    requiresAuth: false,
-    dailyLimit: { free: 200, pro: 5000, enterprise: -1 },
-    features: ['IPv4 address resolution', 'Multiple A records', 'TTL information'],
-    endpoint: '/api/tools/a-record'
+    dailyLimit: { free: 100, pro: 1000, enterprise: -1 }
   },
-  'mx-record': {
+  {
     id: 'mx-record',
     name: 'MX Record Lookup',
-    description: 'Get mail server records for domains',
+    description: 'Get mail exchange records for a domain',
     category: 'dns',
-    icon: 'Mail',
     inputType: 'Domain name',
-    inputPlaceholder: 'example.com',
+    inputPlaceholder: 'Enter domain (e.g., example.com)',
+    features: ['Mail servers', 'Priority levels', 'Email routing'],
     free: true,
-    requiresAuth: false,
-    dailyLimit: { free: 200, pro: 5000, enterprise: -1 },
-    features: ['Mail server discovery', 'Priority rankings', 'Mail routing analysis'],
-    endpoint: '/api/tools/mx-record'
+    dailyLimit: { free: 100, pro: 1000, enterprise: -1 }
   },
-  'txt-record': {
+  {
     id: 'txt-record',
     name: 'TXT Record Lookup',
-    description: 'Get all TXT records for domains',
+    description: 'Get TXT records for a domain',
     category: 'dns',
-    icon: 'Globe',
     inputType: 'Domain name',
-    inputPlaceholder: 'example.com',
+    inputPlaceholder: 'Enter domain (e.g., example.com)',
+    features: ['Text records', 'SPF records', 'Verification tokens'],
     free: true,
-    requiresAuth: false,
-    dailyLimit: { free: 200, pro: 5000, enterprise: -1 },
-    features: ['SPF record detection', 'DKIM keys', 'Domain verification records'],
-    endpoint: '/api/tools/txt-record'
+    dailyLimit: { free: 100, pro: 1000, enterprise: -1 }
   },
-  'cname-lookup': {
+  {
     id: 'cname-lookup',
     name: 'CNAME Lookup',
-    description: 'Get canonical name records',
+    description: 'Get CNAME (alias) records for a domain',
     category: 'dns',
-    icon: 'Network',
     inputType: 'Domain name',
-    inputPlaceholder: 'www.example.com',
+    inputPlaceholder: 'Enter domain (e.g., www.example.com)',
+    features: ['Alias resolution', 'Canonical names', 'Chain following'],
     free: true,
-    requiresAuth: false,
-    dailyLimit: { free: 200, pro: 5000, enterprise: -1 },
-    features: ['Alias resolution', 'CNAME chain following', 'Canonical mapping'],
-    endpoint: '/api/tools/cname-lookup'
+    dailyLimit: { free: 100, pro: 1000, enterprise: -1 }
   },
-  'soa-record': {
+  {
     id: 'soa-record',
     name: 'SOA Record Lookup',
-    description: 'Get Start of Authority records',
+    description: 'Get Start of Authority record for a domain',
     category: 'dns',
-    icon: 'Server',
     inputType: 'Domain name',
-    inputPlaceholder: 'example.com',
+    inputPlaceholder: 'Enter domain (e.g., example.com)',
+    features: ['Authority info', 'Serial numbers', 'Refresh intervals'],
     free: true,
-    requiresAuth: false,
-    dailyLimit: { free: 200, pro: 5000, enterprise: -1 },
-    features: ['Authority server info', 'Serial numbers', 'Refresh intervals'],
-    endpoint: '/api/tools/soa-record'
+    dailyLimit: { free: 100, pro: 1000, enterprise: -1 }
   },
-  'dns-diagnostic': {
-    id: 'dns-diagnostic',
-    name: 'DNS Diagnostic',
-    description: 'Complete DNS health analysis',
-    category: 'dns',
-    icon: 'Network',
-    inputType: 'Domain name',
-    inputPlaceholder: 'example.com',
-    free: false,
-    requiresAuth: true,
-    planRequired: 'pro',
-    dailyLimit: { free: 0, pro: 100, enterprise: 1000 },
-    features: ['Complete DNS audit', 'Performance analysis', 'Security recommendations'],
-    endpoint: '/api/tools/dns-diagnostic'
-  },
-  'dnssec-check': {
+  {
     id: 'dnssec-check',
-    name: 'DNSSEC Check',
-    description: 'Validate DNSSEC implementation',
+    name: 'DNSSEC Validation',
+    description: 'Validate DNSSEC signatures for a domain',
     category: 'dns',
-    icon: 'Shield',
     inputType: 'Domain name',
-    inputPlaceholder: 'example.com',
+    inputPlaceholder: 'Enter domain (e.g., example.com)',
+    features: ['DNSSEC validation', 'Chain of trust', 'Signature verification'],
     free: true,
-    requiresAuth: false,
-    dailyLimit: { free: 100, pro: 2000, enterprise: -1 },
-    features: ['DNSSEC validation', 'Chain of trust verification', 'Security status'],
-    endpoint: '/api/tools/dnssec-check'
+    dailyLimit: { free: 50, pro: 500, enterprise: -1 }
   },
-  'whois-lookup': {
+  {
     id: 'whois-lookup',
     name: 'WHOIS Lookup',
     description: 'Get domain registration information',
     category: 'dns',
-    icon: 'Search',
     inputType: 'Domain name',
-    inputPlaceholder: 'example.com',
+    inputPlaceholder: 'Enter domain (e.g., example.com)',
+    features: ['Registration details', 'Nameservers', 'Expiration dates'],
     free: true,
-    requiresAuth: false,
-    dailyLimit: { free: 50, pro: 1000, enterprise: -1 },
-    features: ['Registration details', 'Expiration dates', 'Nameserver info'],
-    endpoint: '/api/tools/whois-lookup'
+    dailyLimit: { free: 50, pro: 500, enterprise: -1 }
   },
-  'dns-propagation': {
+  {
     id: 'dns-propagation',
-    name: 'DNS Propagation',
-    description: 'Check global DNS propagation status',
+    name: 'DNS Propagation Check',
+    description: 'Check DNS propagation across global servers',
     category: 'dns',
-    icon: 'Globe',
     inputType: 'Domain name',
-    inputPlaceholder: 'example.com',
+    inputPlaceholder: 'Enter domain (e.g., example.com)',
+    features: ['Global propagation', 'Multiple servers', 'Real-time status'],
     free: true,
-    requiresAuth: false,
-    dailyLimit: { free: 20, pro: 500, enterprise: -1 },
-    features: ['Global server checking', 'Propagation mapping', 'TTL analysis'],
-    endpoint: '/api/tools/dns-propagation'
+    dailyLimit: { free: 25, pro: 250, enterprise: -1 }
+  },
+  {
+    id: 'spf-check',
+    name: 'SPF Record Check',
+    description: 'Validate SPF records for email authentication',
+    category: 'dns',
+    inputType: 'Domain name',
+    inputPlaceholder: 'Enter domain (e.g., example.com)',
+    features: ['SPF validation', 'Syntax checking', 'Include resolution'],
+    free: true,
+    dailyLimit: { free: 50, pro: 500, enterprise: -1 }
   },
 
   // Email Tools
-  'spf-check': {
-    id: 'spf-check',
-    name: 'SPF Check',
-    description: 'Validate SPF records for domains',
-    category: 'email',
-    icon: 'Shield',
-    inputType: 'Domain name',
-    inputPlaceholder: 'example.com',
-    free: true,
-    requiresAuth: false,
-    dailyLimit: { free: 100, pro: 2000, enterprise: -1 },
-    features: ['SPF record validation', 'Syntax checking', 'Include chain analysis'],
-    endpoint: '/api/tools/spf-check'
-  },
-  'smtp-test': {
+  {
     id: 'smtp-test',
     name: 'SMTP Test',
-    description: 'Test SMTP server connectivity and auth',
+    description: 'Test SMTP server connectivity and authentication',
     category: 'email',
-    icon: 'Mail',
-    inputType: 'SMTP details',
-    inputPlaceholder: 'smtp.gmail.com:587',
+    inputType: 'SMTP server',
+    inputPlaceholder: 'Enter SMTP server (e.g., smtp.gmail.com:587)',
+    features: ['Connection test', 'Authentication', 'TLS support'],
     free: true,
-    requiresAuth: false,
-    dailyLimit: { free: 20, pro: 500, enterprise: -1 },
-    features: ['SMTP connectivity test', 'Authentication validation', 'Security analysis'],
-    endpoint: '/api/tools/smtp-test'
+    dailyLimit: { free: 25, pro: 250, enterprise: -1 }
   },
-  'email-validation': {
+  {
     id: 'email-validation',
     name: 'Email Validation',
-    description: 'Bulk email address validation',
+    description: 'Validate email address syntax and deliverability',
     category: 'email',
-    icon: 'Shield',
-    inputType: 'Email addresses',
-    inputPlaceholder: 'test@example.com',
+    inputType: 'Email address',
+    inputPlaceholder: 'Enter email address (e.g., user@example.com)',
+    features: ['Syntax validation', 'Domain verification', 'MX checking'],
     free: true,
-    requiresAuth: true,
-    dailyLimit: { free: 10, pro: 100000, enterprise: 1000000 },
-    features: ['Bulk validation', 'Deliverability scoring', 'Export results'],
-    endpoint: '/api/tools/email-validation'
+    dailyLimit: { free: 100, pro: 1000, enterprise: -1 }
   },
-  'email-deliverability': {
+  {
     id: 'email-deliverability',
     name: 'Email Deliverability',
-    description: 'Comprehensive deliverability analysis',
+    description: 'Analyze email deliverability with SPF, DKIM, DMARC',
     category: 'email',
-    icon: 'Shield',
     inputType: 'Domain name',
-    inputPlaceholder: 'example.com',
-    free: false,
-    requiresAuth: true,
-    planRequired: 'pro',
-    dailyLimit: { free: 0, pro: 100, enterprise: 1000 },
-    features: ['SPF/DKIM/DMARC analysis', 'Reputation scoring', 'Improvement recommendations'],
-    endpoint: '/api/tools/email-deliverability'
+    inputPlaceholder: 'Enter domain (e.g., example.com)',
+    features: ['SPF check', 'DKIM validation', 'DMARC analysis'],
+    free: true,
+    dailyLimit: { free: 50, pro: 500, enterprise: -1 }
   },
-  'spf-generator': {
+  {
     id: 'spf-generator',
     name: 'SPF Generator',
-    description: 'Generate SPF records for domains',
+    description: 'Generate SPF records for email authentication',
     category: 'email',
-    icon: 'Shield',
-    inputType: 'Domain details',
-    inputPlaceholder: 'example.com',
+    inputType: 'Domain configuration',
+    inputPlaceholder: 'Enter domain (e.g., example.com)',
+    features: ['SPF generation', 'Syntax validation', 'Best practices'],
     free: true,
-    requiresAuth: false,
-    dailyLimit: { free: 50, pro: 1000, enterprise: -1 },
-    features: ['Interactive SPF builder', 'Validation included', 'Best practices'],
-    endpoint: '/api/tools/spf-generator'
+    dailyLimit: { free: 25, pro: 250, enterprise: -1 }
   },
-  'header-analyzer': {
+  {
     id: 'header-analyzer',
     name: 'Email Header Analyzer',
-    description: 'Analyze email headers for security',
+    description: 'Analyze email headers for routing and security',
     category: 'email',
-    icon: 'Search',
     inputType: 'Email headers',
-    inputPlaceholder: 'Paste email headers...',
+    inputPlaceholder: 'Paste email headers here...',
+    features: ['Header parsing', 'Route analysis', 'Security checks'],
     free: true,
-    requiresAuth: false,
-    dailyLimit: { free: 50, pro: 1000, enterprise: -1 },
-    features: ['Security analysis', 'Route tracing', 'Authentication validation'],
-    endpoint: '/api/tools/header-analyzer'
+    dailyLimit: { free: 50, pro: 500, enterprise: -1 }
   },
-  'email-migration': {
+  {
     id: 'email-migration',
     name: 'Email Migration',
-    description: 'IMAP to IMAP email migration',
+    description: 'IMAP-based email migration between providers',
     category: 'email',
-    icon: 'Server',
-    inputType: 'IMAP details',
-    inputPlaceholder: 'Source and destination servers',
-    free: true,
-    requiresAuth: true,
-    dailyLimit: { free: 1, pro: 20, enterprise: 100 },
-    features: ['IMAP migration', 'Progress tracking', 'Error handling'],
-    endpoint: '/api/tools/email-migration'
+    inputType: 'Migration details',
+    inputPlaceholder: 'Configure migration settings...',
+    features: ['IMAP migration', 'Folder mapping', 'Progress tracking'],
+    free: false,
+    dailyLimit: { free: 0, pro: 10, enterprise: 50 }
   },
 
   // Security Tools
-  'https-test': {
+  {
     id: 'https-test',
-    name: 'SSL/HTTPS Test',
-    description: 'SSL certificate and HTTPS analysis',
+    name: 'HTTPS/SSL Test',
+    description: 'Test SSL certificate and HTTPS configuration',
     category: 'security',
-    icon: 'Shield',
     inputType: 'Domain name',
-    inputPlaceholder: 'example.com',
+    inputPlaceholder: 'Enter domain (e.g., example.com)',
+    features: ['SSL validation', 'Certificate analysis', 'Security grading'],
     free: true,
-    requiresAuth: false,
-    dailyLimit: { free: 100, pro: 2000, enterprise: -1 },
-    features: ['SSL certificate validation', 'Security grade analysis', 'Expiration monitoring'],
-    endpoint: '/api/tools/https-test',
-    monitor: true
+    dailyLimit: { free: 50, pro: 500, enterprise: -1 }
   },
-  'malware-scanner': {
-    id: 'malware-scanner',
-    name: 'Malware Scanner',
-    description: 'Scan websites for malware patterns',
-    category: 'security',
-    icon: 'Shield',
-    inputType: 'URL or domain',
-    inputPlaceholder: 'https://example.com',
-    free: false,
-    requiresAuth: true,
-    planRequired: 'pro',
-    dailyLimit: { free: 0, pro: 50, enterprise: 500 },
-    features: ['Pattern-based detection', 'Security scoring', 'Threat identification'],
-    endpoint: '/api/tools/malware-scanner'
-  },
-  'header-security': {
+  {
     id: 'header-security',
-    name: 'HTTP Security Headers',
+    name: 'Security Headers',
     description: 'Analyze HTTP security headers',
     category: 'security',
-    icon: 'Shield',
-    inputType: 'URL or domain',
-    inputPlaceholder: 'https://example.com',
+    inputType: 'URL',
+    inputPlaceholder: 'Enter URL (e.g., https://example.com)',
+    features: ['Header analysis', 'Security scoring', 'Recommendations'],
     free: true,
-    requiresAuth: false,
-    dailyLimit: { free: 100, pro: 2000, enterprise: -1 },
-    features: ['Security header analysis', 'Compliance checking', 'Best practices'],
-    endpoint: '/api/tools/header-security'
+    dailyLimit: { free: 50, pro: 500, enterprise: -1 }
   }
+];
+
+export const getToolsByCategory = (category: string): ToolConfig[] => {
+  return tools.filter(tool => tool.category === category);
 };
 
-export const getToolsByCategory = (category: string) => {
-  return Object.values(TOOLS_CONFIG).filter(tool => tool.category === category);
+export const getToolById = (id: string): ToolConfig | undefined => {
+  return tools.find(tool => tool.id === id);
 };
 
-export const getToolConfig = (toolId: string): ToolConfig | null => {
-  return TOOLS_CONFIG[toolId] || null;
-};
+export const getUserToolAccess = (tool: ToolConfig, userPlan: string = 'free') => {
+  const planHierarchy = { free: 0, pro: 1, enterprise: 2 };
+  const userPlanLevel = planHierarchy[userPlan as keyof typeof planHierarchy] || 0;
 
-export const getUserToolAccess = (tool: ToolConfig, userPlan: string = 'free'): {
-  canUse: boolean;
-  reason?: string;
-  upgradeRequired?: boolean;
-} => {
-  if (!tool.free && userPlan === 'free') {
+  if (!tool.free && userPlanLevel === 0) {
     return {
       canUse: false,
-      reason: 'This tool requires a Pro or Enterprise plan',
+      reason: 'This tool requires a Pro or Enterprise plan.',
       upgradeRequired: true
     };
   }
 
-  if (tool.planRequired && userPlan !== tool.planRequired && 
-      !(tool.planRequired === 'pro' && userPlan === 'enterprise')) {
-    return {
-      canUse: false,
-      reason: `This tool requires a ${tool.planRequired} plan`,
-      upgradeRequired: true
-    };
+  if (tool.dailyLimit) {
+    const limit = tool.dailyLimit[userPlan as keyof typeof tool.dailyLimit] || 0;
+    if (limit === 0) {
+      return {
+        canUse: false,
+        reason: 'This tool is not available on your current plan.',
+        upgradeRequired: true
+      };
+    }
   }
 
-  return { canUse: true };
+  return {
+    canUse: true,
+    reason: '',
+    upgradeRequired: false
+  };
 };

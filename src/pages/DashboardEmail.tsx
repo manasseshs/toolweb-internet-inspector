@@ -3,7 +3,7 @@ import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
-import ToolCategoryPage from '@/components/dashboard/ToolCategoryPage';
+import ToolCategoryTabs from '@/components/dashboard/ToolCategoryTabs';
 import { getToolsByCategory } from '@/config/toolsConfig';
 
 const DashboardEmail = () => {
@@ -32,7 +32,7 @@ const DashboardEmail = () => {
 
   return (
     <DashboardLayout>
-      <ToolCategoryPage
+      <ToolCategoryTabs
         category="email"
         title="Email Tools"
         description="Email validation, deliverability testing, and configuration"

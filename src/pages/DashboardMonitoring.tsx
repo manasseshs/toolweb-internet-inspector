@@ -3,7 +3,7 @@ import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
-import ToolCategoryPage from '@/components/dashboard/ToolCategoryPage';
+import ToolCategoryTabs from '@/components/dashboard/ToolCategoryTabs';
 import { getToolsByCategory } from '@/config/toolsConfig';
 
 const DashboardMonitoring = () => {
@@ -28,12 +28,11 @@ const DashboardMonitoring = () => {
     return null;
   }
 
-  // For now, monitoring tools will be empty as they're not defined in the config
   const monitoringTools = getToolsByCategory('monitoring');
 
   return (
     <DashboardLayout>
-      <ToolCategoryPage
+      <ToolCategoryTabs
         category="monitoring"
         title="Monitoring"
         description="Uptime monitoring, alerts, and performance tracking"
