@@ -28,14 +28,14 @@ const RecentActivity: React.FC = () => {
       }
 
       try {
-        const { data: usageData } = await supabase
-          .from('tool_usage')
+        const { data: historyData } = await supabase
+          .from('tool_history')
           .select('*')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false })
           .limit(10);
 
-        if (usageData) {
+        if (historyData) {
           // Get all tools to map IDs to names
           const allTools = [
             ...getToolsByCategory('network'),
@@ -44,7 +44,7 @@ const RecentActivity: React.FC = () => {
             ...getToolsByCategory('security')
           ];
 
-          const activities = usageData.map((usage) => {
+          const activities = historyData.map((usage) => {
             const tool = allTools.find(t => t.id === usage.tool_id);
             const toolName = tool?.name || usage.tool_id;
             
@@ -52,9 +52,9 @@ const RecentActivity: React.FC = () => {
               id: usage.id,
               tool: toolName,
               target: usage.input_data,
-              result: usage.success ? 'Success' : 'Failed',
+              result: 'Success',
               time: new Date(usage.created_at).toLocaleTimeString(),
-              success: usage.success
+              success: true
             };
           });
 

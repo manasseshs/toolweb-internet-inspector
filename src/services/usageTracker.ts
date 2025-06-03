@@ -20,24 +20,33 @@ export const trackToolUsage = async (data: UsageData) => {
       return;
     }
 
-    const usageRecord = {
-      user_id: user.id,
-      tool_id: data.toolId,
-      input_data: data.inputData,
-      success: data.success,
-      execution_time: data.executionTime,
-      result_data: data.resultData,
-      error_message: data.errorMessage,
-      user_plan: data.userPlan || 'free'
-    };
+    // Store successful usage in tool_history table
+    if (data.success) {
+      const historyRecord = {
+        user_id: user.id,
+        tool_id: data.toolId,
+        input_data: data.inputData,
+        result_data: data.resultData
+      };
 
-    const { error } = await supabase
-      .from('tool_usage')
-      .insert([usageRecord]);
+      const { error } = await supabase
+        .from('tool_history')
+        .insert([historyRecord]);
 
-    if (error) {
-      console.error('Error tracking tool usage:', error);
+      if (error) {
+        console.error('Error tracking tool usage in history:', error);
+      }
     }
+
+    // Log all usage (successful and failed) to console for now
+    // In the future, you might want to create a separate table for detailed usage logs
+    console.log('Tool usage tracked:', {
+      toolId: data.toolId,
+      success: data.success,
+      userPlan: data.userPlan,
+      executionTime: data.executionTime
+    });
+
   } catch (error) {
     console.error('Error in trackToolUsage:', error);
   }
@@ -51,46 +60,14 @@ export const updateDailyUsageLimit = async (toolId: string, increment = 1) => {
       return;
     }
 
-    const today = new Date().toISOString().split('T')[0];
-    
-    // Check if record exists for today
-    const { data: existingRecord } = await supabase
-      .from('daily_usage_limits')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('tool_id', toolId)
-      .eq('date', today)
-      .single();
+    // For now, we'll just log the usage update
+    // You can implement daily usage limits using the tool_history table
+    console.log('Daily usage updated:', {
+      userId: user.id,
+      toolId,
+      increment
+    });
 
-    if (existingRecord) {
-      // Update existing record
-      const { error } = await supabase
-        .from('daily_usage_limits')
-        .update({ 
-          usage_count: existingRecord.usage_count + increment,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', existingRecord.id);
-
-      if (error) {
-        console.error('Error updating daily usage:', error);
-      }
-    } else {
-      // Create new record
-      const { error } = await supabase
-        .from('daily_usage_limits')
-        .insert([{
-          user_id: user.id,
-          tool_id: toolId,
-          date: today,
-          usage_count: increment,
-          limit_count: 50 // Default daily limit for free users
-        }]);
-
-      if (error) {
-        console.error('Error creating daily usage record:', error);
-      }
-    }
   } catch (error) {
     console.error('Error in updateDailyUsageLimit:', error);
   }
@@ -104,25 +81,25 @@ export const checkDailyUsageLimit = async (toolId: string): Promise<{ canUse: bo
       return { canUse: false, used: 0, limit: 0 };
     }
 
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     
-    const { data: usageRecord } = await supabase
-      .from('daily_usage_limits')
-      .select('*')
+    // Count today's usage from tool_history
+    const { count: todayUsage } = await supabase
+      .from('tool_history')
+      .select('*', { count: 'exact', head: true })
       .eq('user_id', user.id)
       .eq('tool_id', toolId)
-      .eq('date', today)
-      .single();
+      .gte('created_at', today.toISOString());
 
-    if (!usageRecord) {
-      return { canUse: true, used: 0, limit: 50 };
-    }
+    const dailyLimit = 50; // Default daily limit
+    const used = todayUsage || 0;
+    const canUse = used < dailyLimit;
 
-    const canUse = usageRecord.usage_count < usageRecord.limit_count;
     return { 
       canUse, 
-      used: usageRecord.usage_count, 
-      limit: usageRecord.limit_count 
+      used, 
+      limit: dailyLimit 
     };
   } catch (error) {
     console.error('Error checking daily usage limit:', error);
