@@ -22,7 +22,7 @@ export const useToolAccess = (selectedTool: string, isFree: boolean) => {
   };
 
   const requiresCaptcha = () => {
-    return isFree && !user;
+    return true; // Now required for ALL users, logged in or not
   };
 
   return {
@@ -56,6 +56,9 @@ export const AccessBadges: React.FC<AccessBadgesProps> = ({
           Login Required
         </Badge>
       )}
+      <Badge variant="outline" className="bg-[#fff3cd] text-[#856404] border border-[#ffeaa7]">
+        CAPTCHA Required
+      </Badge>
       {executionId && (
         <Badge variant="outline" className="text-xs border-[#dee2e6] text-[#6c757d]">
           ID: {executionId}

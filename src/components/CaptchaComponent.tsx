@@ -6,9 +6,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 interface CaptchaComponentProps {
   onVerify: (verified: boolean) => void;
   isRequired: boolean;
+  userLoggedIn?: boolean;
 }
 
-const CaptchaComponent: React.FC<CaptchaComponentProps> = ({ onVerify, isRequired }) => {
+const CaptchaComponent: React.FC<CaptchaComponentProps> = ({ 
+  onVerify, 
+  isRequired, 
+  userLoggedIn = false 
+}) => {
   const [isVerified, setIsVerified] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -43,6 +48,11 @@ const CaptchaComponent: React.FC<CaptchaComponentProps> = ({ onVerify, isRequire
       <CardHeader className="pb-3">
         <CardTitle className="text-sm font-medium text-gray-700 flex items-center gap-2">
           🔒 Security Verification
+          {userLoggedIn && (
+            <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
+              Required for all users
+            </span>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-0 pb-4">
@@ -67,6 +77,12 @@ const CaptchaComponent: React.FC<CaptchaComponentProps> = ({ onVerify, isRequire
           {isVerified && (
             <div className="text-green-600 text-sm font-medium flex items-center gap-2 justify-center bg-green-50 rounded-lg p-2">
               ✅ Verification successful
+            </div>
+          )}
+          
+          {userLoggedIn && !isVerified && (
+            <div className="text-amber-600 text-xs text-center bg-amber-50 rounded-lg p-2">
+              Please complete the verification to proceed with tool execution
             </div>
           )}
         </div>

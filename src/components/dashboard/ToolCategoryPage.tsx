@@ -4,6 +4,7 @@ import { ToolConfig, getUserToolAccess } from '@/config/toolsConfig';
 import { toolEngine } from '@/services/toolEngine';
 import { useToast } from '@/hooks/use-toast';
 import { ToolExecutionState } from './types/ToolExecutionState';
+import { trackToolUsage, updateDailyUsageLimit, checkDailyUsageLimit } from '@/services/usageTracker';
 import CategoryHeader from './CategoryHeader';
 import EmptyToolsState from './EmptyToolsState';
 import ToolGrid from './ToolGrid';
@@ -59,6 +60,17 @@ const ToolCategoryPage: React.FC<ToolCategoryPageProps> = ({
       return;
     }
 
+    // Check daily usage limit
+    const { canUse, used, limit } = await checkDailyUsageLimit(tool.id);
+    if (!canUse) {
+      toast({
+        title: "Daily limit reached",
+        description: `You've reached your daily limit of ${limit} uses for this tool.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
     const access = getUserToolAccess(tool, user?.plan || 'free');
     if (!access.canUse) {
       toast({
@@ -69,12 +81,18 @@ const ToolCategoryPage: React.FC<ToolCategoryPageProps> = ({
       return;
     }
 
+    const startTime = Date.now();
     updateExecutionState(tool.id, { 
       isLoading: true, 
       progress: 0, 
       result: null, 
       error: null,
-      executionTime: null 
+      executionTime: null,
+      usage: {
+        dailyUsed: used,
+        dailyLimit: limit,
+        remaining: limit - used
+      }
     });
 
     try {
@@ -92,14 +110,31 @@ const ToolCategoryPage: React.FC<ToolCategoryPageProps> = ({
       });
 
       clearInterval(progressInterval);
+      const executionTime = Date.now() - startTime;
 
       if (result.success) {
+        // Track successful usage
+        await trackToolUsage({
+          toolId: tool.id,
+          inputData: input,
+          success: true,
+          executionTime,
+          resultData: result.data,
+          userPlan: user?.plan || 'free'
+        });
+
+        await updateDailyUsageLimit(tool.id, 1);
+
         updateExecutionState(tool.id, {
           isLoading: false,
           progress: 100,
           result: result.data,
-          executionTime: result.executionTime,
-          usage: result.usage
+          executionTime,
+          usage: {
+            dailyUsed: used + 1,
+            dailyLimit: limit,
+            remaining: limit - used - 1
+          }
         });
 
         toast({
@@ -107,6 +142,16 @@ const ToolCategoryPage: React.FC<ToolCategoryPageProps> = ({
           description: `${tool.name} executed successfully.`,
         });
       } else {
+        // Track failed usage
+        await trackToolUsage({
+          toolId: tool.id,
+          inputData: input,
+          success: false,
+          executionTime,
+          errorMessage: result.error || 'Unknown error occurred',
+          userPlan: user?.plan || 'free'
+        });
+
         updateExecutionState(tool.id, {
           isLoading: false,
           progress: 0,
@@ -120,10 +165,23 @@ const ToolCategoryPage: React.FC<ToolCategoryPageProps> = ({
         });
       }
     } catch (error) {
+      const executionTime = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      
+      // Track failed usage
+      await trackToolUsage({
+        toolId: tool.id,
+        inputData: input,
+        success: false,
+        executionTime,
+        errorMessage,
+        userPlan: user?.plan || 'free'
+      });
+
       updateExecutionState(tool.id, {
         isLoading: false,
         progress: 0,
-        error: error instanceof Error ? error.message : 'Unknown error occurred'
+        error: errorMessage
       });
 
       toast({

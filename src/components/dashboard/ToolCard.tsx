@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,8 @@ import { Progress } from '@/components/ui/progress';
 import { AlertCircle, Play, RefreshCw, CheckCircle, XCircle, Clock, Zap, Crown } from 'lucide-react';
 import { ToolConfig, getUserToolAccess } from '@/config/toolsConfig';
 import { ToolExecutionState } from './types/ToolExecutionState';
+import { checkDailyUsageLimit } from '@/services/usageTracker';
+import CaptchaComponent from '@/components/CaptchaComponent';
 
 interface ToolCardProps {
   tool: ToolConfig;
@@ -26,7 +28,33 @@ const ToolCard: React.FC<ToolCardProps> = ({
   onInputChange,
   onExecute
 }) => {
+  const [captchaVerified, setCaptchaVerified] = useState(false);
+  const [usageInfo, setUsageInfo] = useState({ used: 0, limit: 50, canUse: true });
   const access = getUserToolAccess(tool, user?.plan || 'free');
+
+  useEffect(() => {
+    const checkUsage = async () => {
+      const usage = await checkDailyUsageLimit(tool.id);
+      setUsageInfo(usage);
+    };
+    
+    if (user) {
+      checkUsage();
+    }
+  }, [tool.id, user]);
+
+  const handleExecute = () => {
+    if (captchaVerified) {
+      onExecute();
+    }
+  };
+
+  const requiresCaptcha = true; // Now required for all users
+  const canExecute = access.canUse && 
+                    input.trim() && 
+                    !executionState.isLoading && 
+                    usageInfo.canUse && 
+                    (requiresCaptcha ? captchaVerified : true);
 
   return (
     <Card className="border-[#dee2e6] bg-white">
@@ -72,16 +100,14 @@ const ToolCard: React.FC<ToolCardProps> = ({
               onChange={(e) => onInputChange(e.target.value)}
               className="border-[#dee2e6] bg-white text-[#212529] placeholder:text-[#6c757d] focus:border-[#0d6efd] focus:ring-[#0d6efd]"
               disabled={executionState.isLoading || !access.canUse}
-              onKeyPress={(e) => e.key === 'Enter' && onExecute()}
+              onKeyPress={(e) => e.key === 'Enter' && canExecute && handleExecute()}
             />
             
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-xs text-[#6c757d]">
-                {executionState.usage && (
-                  <span>
-                    {executionState.usage.dailyUsed}/{executionState.usage.dailyLimit === -1 ? '∞' : executionState.usage.dailyLimit} today
-                  </span>
-                )}
+                <span>
+                  {usageInfo.used}/{usageInfo.limit === -1 ? '∞' : usageInfo.limit} today
+                </span>
                 {executionState.executionTime && (
                   <span className="flex items-center gap-1">
                     <Clock className="w-3 h-3" />
@@ -91,8 +117,8 @@ const ToolCard: React.FC<ToolCardProps> = ({
               </div>
               
               <Button
-                onClick={onExecute}
-                disabled={executionState.isLoading || !access.canUse || !input.trim()}
+                onClick={handleExecute}
+                disabled={!canExecute}
                 size="sm"
                 className="bg-[#0d6efd] hover:bg-[#0b5ed7] text-white border-none"
               >
@@ -106,6 +132,17 @@ const ToolCard: React.FC<ToolCardProps> = ({
             </div>
           </div>
 
+          {/* reCAPTCHA - Now required for all users */}
+          {input.trim() && (
+            <div className="flex justify-center">
+              <CaptchaComponent 
+                onVerify={setCaptchaVerified}
+                isRequired={requiresCaptcha}
+                userLoggedIn={!!user}
+              />
+            </div>
+          )}
+
           {/* Progress Bar */}
           {executionState.isLoading && (
             <div className="space-y-2">
@@ -113,6 +150,19 @@ const ToolCard: React.FC<ToolCardProps> = ({
               <p className="text-xs text-[#6c757d] text-center">
                 Processing... {executionState.progress}%
               </p>
+            </div>
+          )}
+
+          {/* Usage Limit Warning */}
+          {!usageInfo.canUse && (
+            <div className="p-3 bg-[#fff3cd] border border-[#ffeaa7] rounded-lg">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 text-[#856404] mt-0.5" />
+                <div className="text-sm text-[#856404]">
+                  <p>Daily usage limit reached ({usageInfo.limit} uses per day)</p>
+                  <p className="text-xs mt-1">Upgrade to Pro for unlimited usage</p>
+                </div>
+              </div>
             </div>
           )}
 
