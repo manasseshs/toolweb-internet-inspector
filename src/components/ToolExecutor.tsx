@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useToolAccess } from './tool/ToolAccessControl';
 import { useToolExecution } from './tool/ToolExecutionEngine';
 import ToolInputSection from './tool/ToolInputSection';
@@ -17,6 +17,9 @@ interface ToolExecutorProps {
 }
 
 const ToolExecutor: React.FC<ToolExecutorProps> = ({ selectedTool, toolName, inputType, isFree }) => {
+  const [canUseToolState, setCanUseToolState] = useState(false);
+  const [accessCheckLoading, setAccessCheckLoading] = useState(true);
+
   const {
     requiresLogin,
     canUseTool,
@@ -32,6 +35,24 @@ const ToolExecutor: React.FC<ToolExecutorProps> = ({ selectedTool, toolName, inp
     executionId,
     executeToolAnalysis
   } = useToolExecution();
+
+  // Check tool access when component mounts or dependencies change
+  useEffect(() => {
+    const checkAccess = async () => {
+      setAccessCheckLoading(true);
+      try {
+        const canUse = await canUseTool();
+        setCanUseToolState(canUse);
+      } catch (error) {
+        console.error('Error checking tool access:', error);
+        setCanUseToolState(false);
+      } finally {
+        setAccessCheckLoading(false);
+      }
+    };
+
+    checkAccess();
+  }, [canUseTool, selectedTool]);
 
   // Special tools that have their own components
   if (selectedTool === 'email-validation') {
@@ -51,7 +72,7 @@ const ToolExecutor: React.FC<ToolExecutorProps> = ({ selectedTool, toolName, inp
       selectedTool,
       input,
       toolName,
-      canUseTool,
+      canUseToolState,
       requiresLogin,
       requiresCaptcha,
       captchaVerified,
@@ -67,8 +88,8 @@ const ToolExecutor: React.FC<ToolExecutorProps> = ({ selectedTool, toolName, inp
         inputType={inputType}
         isFree={isFree}
         onExecute={handleExecute}
-        isLoading={isLoading}
-        canUseTool={canUseTool}
+        isLoading={isLoading || accessCheckLoading}
+        canUseTool={canUseToolState}
         requiresLogin={requiresLogin}
         requiresCaptcha={requiresCaptcha}
         user={user}

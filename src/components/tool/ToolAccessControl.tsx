@@ -33,7 +33,7 @@ export const useToolAccess = (selectedTool: string, isFree: boolean) => {
     // For authenticated users, check plan restrictions
     if (isFree) return true;
     
-    const userPlan = user.user_metadata?.plan || user.plan || 'free';
+    const userPlan = user.plan || 'free';
     return userPlan === 'pro' || userPlan === 'enterprise';
   };
 
@@ -43,7 +43,7 @@ export const useToolAccess = (selectedTool: string, isFree: boolean) => {
 
   const getUserPlan = () => {
     if (!user) return 'anonymous';
-    return user.user_metadata?.plan || user.plan || 'free';
+    return user.plan || 'free';
   };
 
   const getDailyLimit = async () => {
