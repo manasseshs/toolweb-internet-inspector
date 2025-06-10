@@ -10,6 +10,7 @@ const authRoutes = require('./routes/auth');
 const emailRoutes = require('./routes/email');
 const subscriptionRoutes = require('./routes/subscription');
 const adminRoutes = require('./routes/admin');
+const anonymousRoutes = require('./routes/anonymous'); // Add new routes
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -23,12 +24,19 @@ app.use(cors({
   credentials: true
 }));
 
-// Rate limiting
+// Rate limiting - more permissive for anonymous usage tracking
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 100 // máximo 100 requests por IP por janela
+  max: 200 // increased limit for anonymous usage tracking
 });
 app.use(limiter);
+
+// Anonymous usage specific rate limiting
+const anonymousLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 30, // 30 requests per minute for anonymous endpoints
+  message: { error: 'Too many anonymous requests, please try again later' }
+});
 
 // Middleware para parsing
 app.use(express.json({ limit: '10mb' }));
@@ -39,6 +47,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/email', emailRoutes);
 app.use('/api/subscription', subscriptionRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/anonymous', anonymousLimiter, anonymousRoutes); // Add anonymous routes with specific rate limiting
 
 // Rota de saúde
 app.get('/health', (req, res) => {
@@ -77,6 +86,7 @@ const startServer = async () => {
       console.log(`🚀 Servidor rodando na porta ${PORT}`);
       console.log(`🌍 Ambiente: ${process.env.NODE_ENV || 'development'}`);
       console.log(`📊 Health check: http://localhost:${PORT}/health`);
+      console.log(`🔗 Anonymous usage API: http://localhost:${PORT}/api/anonymous`);
     });
   } catch (error) {
     console.error('💥 Erro ao iniciar servidor:', error);

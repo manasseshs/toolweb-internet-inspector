@@ -1,5 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { anonymousUsageTracker } from './anonymousUsageTracker';
 
 interface UsageData {
   toolId: string;
@@ -11,16 +12,31 @@ interface UsageData {
   userPlan?: string;
 }
 
+interface UsageLimitResult {
+  canUse: boolean;
+  used: number;
+  limit: number;
+  remaining?: number;
+}
+
 export const trackToolUsage = async (data: UsageData) => {
   try {
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
-      console.warn('No user found for usage tracking');
+      // Track anonymous usage via MySQL backend
+      console.log('Tracking anonymous usage via MySQL backend');
+      await anonymousUsageTracker.trackUsage({
+        toolId: data.toolId,
+        inputData: data.inputData,
+        success: data.success,
+        executionTime: data.executionTime,
+        errorMessage: data.errorMessage
+      });
       return;
     }
 
-    // Store successful usage in tool_history table
+    // Store successful usage in Supabase tool_history table for authenticated users
     if (data.success) {
       const historyRecord = {
         user_id: user.id,
@@ -34,13 +50,12 @@ export const trackToolUsage = async (data: UsageData) => {
         .insert([historyRecord]);
 
       if (error) {
-        console.error('Error tracking tool usage in history:', error);
+        console.error('Error tracking tool usage in Supabase history:', error);
       }
     }
 
     // Log all usage (successful and failed) to console for now
-    // In the future, you might want to create a separate table for detailed usage logs
-    console.log('Tool usage tracked:', {
+    console.log('Tool usage tracked for authenticated user:', {
       toolId: data.toolId,
       success: data.success,
       userPlan: data.userPlan,
@@ -57,12 +72,13 @@ export const updateDailyUsageLimit = async (toolId: string, increment = 1) => {
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
+      // For anonymous users, usage is already tracked in trackToolUsage
+      console.log('Anonymous user daily usage updated via MySQL');
       return;
     }
 
-    // For now, we'll just log the usage update
-    // You can implement daily usage limits using the tool_history table
-    console.log('Daily usage updated:', {
+    // For authenticated users, log the usage update
+    console.log('Daily usage updated for authenticated user:', {
       userId: user.id,
       toolId,
       increment
@@ -73,14 +89,23 @@ export const updateDailyUsageLimit = async (toolId: string, increment = 1) => {
   }
 };
 
-export const checkDailyUsageLimit = async (toolId: string): Promise<{ canUse: boolean; used: number; limit: number }> => {
+export const checkDailyUsageLimit = async (toolId: string): Promise<UsageLimitResult> => {
   try {
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
-      return { canUse: false, used: 0, limit: 0 };
+      // Check anonymous usage limits via MySQL backend
+      console.log('Checking anonymous usage limit via MySQL backend');
+      const result = await anonymousUsageTracker.checkUsageLimit(toolId);
+      return {
+        canUse: result.canUse,
+        used: result.usedToday,
+        limit: result.dailyLimit,
+        remaining: result.remaining
+      };
     }
 
+    // For authenticated users, check Supabase limits
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
@@ -92,17 +117,52 @@ export const checkDailyUsageLimit = async (toolId: string): Promise<{ canUse: bo
       .eq('tool_id', toolId)
       .gte('created_at', today.toISOString());
 
-    const dailyLimit = 50; // Default daily limit
+    // Get user plan from auth metadata or default to free
+    const userPlan = user.user_metadata?.plan || 'free';
+    
+    // Set limits based on plan
+    let dailyLimit = 50; // Default for free users
+    if (userPlan === 'pro') dailyLimit = 500;
+    if (userPlan === 'enterprise') dailyLimit = -1; // Unlimited
+
     const used = todayUsage || 0;
-    const canUse = used < dailyLimit;
+    const canUse = dailyLimit === -1 || used < dailyLimit;
+    const remaining = dailyLimit === -1 ? -1 : Math.max(0, dailyLimit - used);
 
     return { 
       canUse, 
       used, 
-      limit: dailyLimit 
+      limit: dailyLimit,
+      remaining
     };
   } catch (error) {
     console.error('Error checking daily usage limit:', error);
-    return { canUse: true, used: 0, limit: 50 };
+    // Return conservative defaults on error
+    return { canUse: false, used: 0, limit: 10 };
+  }
+};
+
+export const getUsageStats = async () => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      // Get anonymous usage stats from MySQL backend
+      console.log('Getting anonymous usage stats');
+      return await anonymousUsageTracker.getUsageStats();
+    }
+
+    // Get authenticated user stats from Supabase
+    const { data: historyData } = await supabase
+      .from('tool_history')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(100);
+
+    return historyData || [];
+  } catch (error) {
+    console.error('Error getting usage stats:', error);
+    return [];
   }
 };
