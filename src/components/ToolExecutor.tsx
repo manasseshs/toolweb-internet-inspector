@@ -1,13 +1,14 @@
-
 import React, { useState, useEffect } from 'react';
 import { useToolAccess } from './tool/ToolAccessControl';
 import { useToolExecution } from './tool/ToolExecutionEngine';
+import { useAdManager } from '@/hooks/useAdManager';
 import ToolInputSection from './tool/ToolInputSection';
 import EmptyToolState from './tool/EmptyToolState';
 import ExecutionProgress from './ExecutionProgress';
 import ToolResults from './ToolResults';
 import EmailVerification from './EmailVerification';
 import EmailMigration from './EmailMigration';
+import AdContainer from './ads/AdContainer';
 
 interface ToolExecutorProps {
   selectedTool: string;
@@ -19,6 +20,7 @@ interface ToolExecutorProps {
 const ToolExecutor: React.FC<ToolExecutorProps> = ({ selectedTool, toolName, inputType, isFree }) => {
   const [canUseToolState, setCanUseToolState] = useState(false);
   const [accessCheckLoading, setAccessCheckLoading] = useState(true);
+  const { refreshAds, executionCount } = useAdManager();
 
   const {
     requiresLogin,
@@ -78,6 +80,9 @@ const ToolExecutor: React.FC<ToolExecutorProps> = ({ selectedTool, toolName, inp
       captchaVerified,
       user
     );
+    
+    // Refresh ads on each execution for monetization
+    refreshAds();
   };
 
   return (
@@ -96,6 +101,13 @@ const ToolExecutor: React.FC<ToolExecutorProps> = ({ selectedTool, toolName, inp
         executionId={executionId}
       />
 
+      {/* Ad Below Form */}
+      <AdContainer 
+        placement="below-form" 
+        className="my-4"
+        refreshTrigger={executionCount}
+      />
+
       {/* Progress */}
       <ExecutionProgress 
         isLoading={isLoading}
@@ -103,6 +115,15 @@ const ToolExecutor: React.FC<ToolExecutorProps> = ({ selectedTool, toolName, inp
         logs={logs}
         input=""
       />
+
+      {/* Ad Above Results */}
+      {(result || isLoading) && (
+        <AdContainer 
+          placement="above-results" 
+          className="mb-4"
+          refreshTrigger={executionCount}
+        />
+      )}
 
       {/* Results */}
       <ToolResults 

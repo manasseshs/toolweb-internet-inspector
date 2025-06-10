@@ -1,7 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAdManager } from '@/hooks/useAdManager';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,6 +12,7 @@ import { getToolById, getUserToolAccess } from '@/config/toolsConfig';
 import { toolEngine } from '@/services/toolEngine';
 import { useToast } from '@/hooks/use-toast';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import AdContainer from '@/components/ads/AdContainer';
 
 interface ToolExecutionState {
   isLoading: boolean;
@@ -32,6 +33,7 @@ const ToolPage = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
+  const { refreshAds, executionCount } = useAdManager();
 
   const [input, setInput] = useState(searchParams.get('input') || '');
   const [executionState, setExecutionState] = useState<ToolExecutionState>({
@@ -110,6 +112,9 @@ const ToolPage = () => {
       error: null,
       executionTime: null 
     });
+
+    // Refresh ads on execution start
+    refreshAds();
 
     try {
       const progressInterval = setInterval(() => {
@@ -264,6 +269,13 @@ const ToolPage = () => {
               </div>
             </div>
 
+            {/* Ad Below Form */}
+            <AdContainer 
+              placement="below-form" 
+              className="my-6"
+              refreshTrigger={executionCount}
+            />
+
             {/* Progress Bar */}
             {executionState.isLoading && (
               <div className="space-y-2">
@@ -292,6 +304,15 @@ const ToolPage = () => {
                   </div>
                 </div>
               </div>
+            )}
+
+            {/* Ad Above Results */}
+            {(executionState.result || executionState.error) && (
+              <AdContainer 
+                placement="above-results" 
+                className="my-6"
+                refreshTrigger={executionCount}
+              />
             )}
 
             {/* Results */}
@@ -323,6 +344,15 @@ const ToolPage = () => {
             )}
           </CardContent>
         </Card>
+
+        {/* Sidebar Ad */}
+        <div className="lg:hidden">
+          <AdContainer 
+            placement="sidebar" 
+            className="mt-6"
+            refreshTrigger={executionCount}
+          />
+        </div>
       </div>
     </DashboardLayout>
   );

@@ -1,0 +1,89 @@
+
+/* Ad Container Responsive Styles */
+.ad-container {
+  display: flex;
+  justify-content: center;
+  margin: 16px 0;
+  overflow: hidden;
+}
+
+.ad-content {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Desktop Ad Sizes */
+.ad-leaderboard {
+  max-width: 728px;
+  min-height: 90px;
+}
+
+.ad-rectangle {
+  max-width: 336px;
+  min-height: 280px;
+}
+
+.ad-sidebar {
+  max-width: 300px;
+  min-height: 250px;
+}
+
+.ad-footer {
+  max-width: 728px;
+  min-height: 90px;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .ad-leaderboard,
+  .ad-footer {
+    max-width: 320px;
+    min-height: 100px;
+  }
+  
+  .ad-rectangle,
+  .ad-sidebar {
+    max-width: 300px;
+    min-height: 250px;
+  }
+  
+  .ad-mobile {
+    max-width: 320px;
+    min-height: 100px;
+  }
+}
+
+/* Tablet Responsive */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .ad-leaderboard,
+  .ad-footer {
+    max-width: 728px;
+    min-height: 90px;
+  }
+  
+  .ad-rectangle,
+  .ad-sidebar {
+    max-width: 336px;
+    min-height: 280px;
+  }
+}
+
+/* Ad Placeholder Styles */
+.ad-placeholder {
+  transition: all 0.3s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.ad-placeholder:hover {
+  background: linear-gradient(45deg, #e8e8e8, #d8d8d8);
+}
+
+/* Ad Blocked Notice */
+.ad-blocked-notice {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

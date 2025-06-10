@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -9,7 +8,9 @@ import { AlertCircle, Play, RefreshCw, CheckCircle, XCircle, Clock, Zap, Crown }
 import { ToolConfig, getUserToolAccess } from '@/config/toolsConfig';
 import { ToolExecutionState } from './types/ToolExecutionState';
 import { checkDailyUsageLimit } from '@/services/usageTracker';
+import { useAdManager } from '@/hooks/useAdManager';
 import CaptchaComponent from '@/components/CaptchaComponent';
+import AdContainer from '@/components/ads/AdContainer';
 
 interface ToolCardProps {
   tool: ToolConfig;
@@ -30,6 +31,7 @@ const ToolCard: React.FC<ToolCardProps> = ({
 }) => {
   const [captchaVerified, setCaptchaVerified] = useState(false);
   const [usageInfo, setUsageInfo] = useState({ used: 0, limit: 50, canUse: true });
+  const { refreshAds, executionCount } = useAdManager();
   const access = getUserToolAccess(tool, user?.plan || 'free');
 
   useEffect(() => {
@@ -46,6 +48,7 @@ const ToolCard: React.FC<ToolCardProps> = ({
   const handleExecute = () => {
     if (captchaVerified) {
       onExecute();
+      refreshAds();
     }
   };
 
@@ -132,6 +135,13 @@ const ToolCard: React.FC<ToolCardProps> = ({
             </div>
           </div>
 
+          {/* Ad Below Input (for listing pages) */}
+          <AdContainer 
+            placement="listing" 
+            className="my-3"
+            refreshTrigger={executionCount}
+          />
+
           {/* reCAPTCHA - Now required for all users */}
           {input.trim() && (
             <div className="flex justify-center">
@@ -184,6 +194,15 @@ const ToolCard: React.FC<ToolCardProps> = ({
                 </div>
               </div>
             </div>
+          )}
+
+          {/* Ad Above Results */}
+          {(executionState.result || executionState.error) && (
+            <AdContainer 
+              placement="above-results" 
+              className="my-3"
+              refreshTrigger={executionCount}
+            />
           )}
 
           {/* Results */}
